@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite dev --port 3400",
     "build": "vite build",
-    "start": "srvx serve --entry dist/server/server.js --static dist/client --prod --host 0.0.0.0 --port 3000",
+    "start": "srvx serve --entry dist/server/server.js --static ../client --prod --host 0.0.0.0 --port 3000",
     "worker": "tsx src/worker/main.ts",
     "db:migrate": "tsx scripts/migrate.ts",
     "design:generate": "tsx scripts/design-generate.ts",
