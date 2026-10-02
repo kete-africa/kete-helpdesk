@@ -1,0 +1,5 @@
+@import 'tailwindcss';
+@import '@kete/design/styles.css';
+@source '../../node_modules/@kete/design/src';
+@source '../../node_modules/@kete/feedback/src';
+/* An app with its own design (D-038) imports its generated CSS here: @import './design.gen.css'; */

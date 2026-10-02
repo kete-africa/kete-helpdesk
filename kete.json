@@ -1,0 +1,19 @@
+{
+  "product": "prd_kete_helpdesk",
+  "name": "Support (kete-helpdesk)",
+  "version": "0.1.0",
+  "events": [],
+  "governance": {
+    "owner": {
+      "name": "Kete",
+      "contact": "support@kete.africa"
+    },
+    "dataCategories": [
+      "personal"
+    ],
+    "ai": {
+      "used": false
+    },
+    "criticality": "medium"
+  }
+}
