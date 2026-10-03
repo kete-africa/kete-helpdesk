@@ -37,7 +37,7 @@ import { screenActor } from '../src/platform/session';
 
 let db: TestSchema;
 
-const person = (userId: string, role: KeteIdentity['role'], organizationId = 'org_a') =>
+const person = (userId: string, role: KeteIdentity['role'], organizationId = 'org_acme') =>
   ({
     userId,
     email: `${userId}@example.test`,
@@ -83,7 +83,7 @@ afterAll(async () => {
 });
 
 function run<I extends z.ZodType>(command: CommandDefinition<I, unknown>, input: z.input<I>) {
-  return transaction('org_a', (tx) =>
+  return transaction('org_acme', (tx) =>
     executeCommand(tx, command, {
       ...onScreen(ama),
       idempotencyKey: `test-${randomUUID()}`,
@@ -144,10 +144,10 @@ describe('a ticket’s life', () => {
       }),
     );
     expect(opened).toMatchObject({ status: 'done' });
-    const [ticket] = await transaction('org_a', (tx) => listTickets(tx, { open: true }));
+    const [ticket] = await transaction('org_acme', (tx) => listTickets(tx, { open: true }));
     expect(ticket).toMatchObject({ status: 'received', queueName: 'SAV', requesterName: 'usr_kofi' });
     ticketId = ticket?.ticketId ?? '';
-    const journal = await transaction('org_a', (tx) => readJournal(tx));
+    const journal = await transaction('org_acme', (tx) => readJournal(tx));
     expect(journal.find((e) => e.name === 'open-ticket')).toMatchObject({
       actor: { kind: 'agent' },
       channel: 'mcp',
@@ -160,16 +160,16 @@ describe('a ticket’s life', () => {
     await run(suspendTicket, { ticketId, reason: 'Pièce attendue du fournisseur' });
     await run(resumeTicket, { ticketId });
     await run(restoreTicket, { ticketId });
-    const ticket = await transaction('org_a', (tx) => findTicket(tx, ticketId));
+    const ticket = await transaction('org_acme', (tx) => findTicket(tx, ticketId));
     expect(ticket).toMatchObject({ status: 'restored', assigneeName: 'Ama' });
     expect(withinTarget(ticket!)).toBe(true);
-    expect(await transaction('org_a', (tx) => listTickets(tx, { open: true }))).toHaveLength(0);
+    expect(await transaction('org_acme', (tx) => listTickets(tx, { open: true }))).toHaveLength(0);
   });
 
   it('may be reopened, and counts it', async () => {
     await expect(run(restoreTicket, { ticketId })).rejects.toThrow(TicketRuleError);
     await run(reopenTicket, { ticketId });
-    const ticket = await transaction('org_a', (tx) => findTicket(tx, ticketId));
+    const ticket = await transaction('org_acme', (tx) => findTicket(tx, ticketId));
     expect(ticket).toMatchObject({ status: 'acknowledged', reopenCount: 1, restoredAt: null });
   });
 
@@ -182,12 +182,12 @@ describe('a ticket’s life', () => {
       }),
     );
     expect(opened).toMatchObject({ status: 'done', undo: 'withdraw-ticket' });
-    const mistake = (await transaction('org_a', (tx) => listTickets(tx, { open: true }))).find(
+    const mistake = (await transaction('org_acme', (tx) => listTickets(tx, { open: true }))).find(
       (t) => t.title === 'Doublon',
     );
     await run(withdrawTicket, { ticketId: mistake?.ticketId ?? '' });
     await expect(run(withdrawTicket, { ticketId })).rejects.toThrow(TicketRuleError);
-    expect(await transaction('org_a', (tx) => findTicket(tx, mistake?.ticketId ?? ''))).toMatchObject({
+    expect(await transaction('org_acme', (tx) => findTicket(tx, mistake?.ticketId ?? ''))).toMatchObject({
       status: 'withdrawn',
     });
   });
@@ -270,6 +270,26 @@ describe('the app contract (kete-core specs 045 and 049)', () => {
       vi.unstubAllGlobals();
       delete process.env.ENTERPRISE_API_URL;
     }
+  });
+});
+
+describe('the business events to Kete Enterprise (kete-core spec 049)', () => {
+  it('announces a ticket opened and restored, facts and ids only', async () => {
+    expect(manifest().emits?.map((e) => e.type)).toEqual([
+      'ticket.opened',
+      'ticket.restored',
+      'ticket.reopened',
+    ]);
+    const { rows } = await db.owner.query<{ envelope: { type: string; data: object } }>(
+      `select envelope from ${db.schema}.kete_center_outbox order by created_at`,
+    );
+    expect(rows.map((r) => r.envelope.type)).toContain('ticket.opened');
+    expect(rows.map((r) => r.envelope.type)).toContain('ticket.restored');
+    expect(rows[0]?.envelope.data).toEqual({
+      ticketId: expect.stringMatching(/^tkt_/),
+      queueId: expect.stringMatching(/^que_/),
+      criticality: expect.any(String),
+    });
   });
 });
 

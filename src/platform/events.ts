@@ -1,3 +1,4 @@
+import { createAppToken } from '@kete/auth';
 import { describePermissions } from '@kete/capabilities';
 import {
   createOutboxRelay,
@@ -7,8 +8,12 @@ import {
   type HealthOptions,
   type Manifest,
 } from '@kete/sdk';
+import { z } from 'zod';
+import { ticketEvents } from '@/features/tickets';
 import app from '../../kete.json' with { type: 'json' };
+import { CENTER_OUTBOX } from './announce';
 import { PRODUCT, VERSION } from './app';
+import { getCenter } from './center';
 import { getPool } from './db';
 import { env } from './env';
 import { datasets, registry } from './registry';
@@ -55,6 +60,13 @@ export function manifest(): Manifest {
     // Its permissions and their words (kete-core spec 049): Kete Enterprise lets an administrator
     // grant them; its client id lets the center accept the app's own tokens.
     permissions: describePermissions(permissions),
+    // The business events it announces to Kete Enterprise, and their data (kete-core spec 049).
+    emits: ticketEvents.map((e) => ({
+      type: e.type,
+      description: e.description,
+      classification: e.classification,
+      data: z.toJSONSchema(e.data) as Record<string, unknown>,
+    })),
     ...client(),
     ...endpoints(),
   });
@@ -78,5 +90,26 @@ export async function flushEvents(): Promise<void> {
     transport: httpTransport({ url }),
     product: PRODUCT,
     key: { kid, secret },
+  }).flush();
+}
+
+let appToken: (() => Promise<string | null>) | undefined;
+
+/**
+ * Delivers the business events to Kete Enterprise once (the worker's job), with the app's own
+ * token (`kete:center`, kete-core spec 049): no shared key. Without it, they wait.
+ */
+export async function flushCenterEvents(): Promise<void> {
+  const url = getCenter().eventsUrl;
+  const accountUrl = process.env.KETE_ACCOUNT_URL;
+  const clientId = process.env.KETE_CLIENT_ID;
+  const clientSecret = process.env.KETE_CLIENT_SECRET;
+  if (!url || !accountUrl || !clientId || !clientSecret) return;
+  appToken ??= createAppToken({ accountUrl, clientId, clientSecret, scope: 'kete:center' });
+  await createOutboxRelay({
+    pool: getPool(),
+    outbox: CENTER_OUTBOX,
+    transport: httpTransport({ url, token: appToken }),
+    product: PRODUCT,
   }).flush();
 }

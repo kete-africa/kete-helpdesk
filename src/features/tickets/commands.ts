@@ -1,5 +1,6 @@
 import { defineCommand } from '@kete/commands';
 import { z } from 'zod';
+import { announce } from '@/platform/announce';
 import { check, mayReopen, TicketRuleError, type Step } from './domain/clock';
 import { findTicket, insertQueue, insertTicket, updateTicket } from './infrastructure/ticket.table';
 import { queueInput, ticketInput } from './ticket.record';
@@ -22,7 +23,7 @@ export const openTicket = defineCommand({
   reversibility: { reversible: true, inverse: 'withdraw-ticket' },
   async handler(input, { db, organizationId, actor }) {
     const requester = actor.onBehalfOf?.id ?? actor.id;
-    return insertTicket(db, {
+    const ticket = await insertTicket(db, {
       organizationId,
       queueId: input.queueId,
       title: input.title,
@@ -34,6 +35,13 @@ export const openTicket = defineCommand({
       if (error.code === '23503') throw new TicketRuleError('not_found');
       throw error;
     });
+    // Kete Enterprise hears of it with the change (kete-core spec 049).
+    await announce(db, {
+      type: 'ticket.opened',
+      organization: organizationId,
+      data: { ticketId: ticket.ticketId, queueId: input.queueId, criticality: input.criticality },
+    });
+    return ticket;
   },
   summarize: (input) => `Ticket « ${input.title} » opened (${input.criticality})`,
 });
@@ -47,6 +55,8 @@ function step(
     actorId: string;
     actorName?: string | undefined;
   }) => { sql: string; values: unknown[] },
+  /** The business event this step announces, if any (kete-core spec 049). */
+  event?: 'ticket.restored' | 'ticket.reopened',
 ) {
   return defineCommand({
     name: `${name}-ticket`,
@@ -55,7 +65,7 @@ function step(
       actorName: z.string().trim().min(1).max(160).optional(),
     }),
     reversibility: { reversible: false },
-    async handler(input, { db, actor }) {
+    async handler(input, { db, actor, organizationId }) {
       const ticket = await findTicket(db, input.ticketId, true);
       if (!ticket) throw new TicketRuleError('not_found');
       check(name, ticket.status);
@@ -65,6 +75,17 @@ function step(
         actorName: input.actorName,
       });
       await updateTicket(db, ticket.ticketId, change.sql, change.values);
+      if (event) {
+        await announce(db, {
+          type: event,
+          organization: organizationId,
+          data: {
+            ticketId: ticket.ticketId,
+            queueId: ticket.queueId,
+            criticality: ticket.criticality,
+          },
+        });
+      }
       return { ticketId: ticket.ticketId };
     },
     summarize: (input) => `Ticket ${input.ticketId} ${verb}`,
@@ -95,11 +116,16 @@ export const resumeTicket = step('resume', 'resumed', () => ({
   values: [],
 }));
 
-export const restoreTicket = step('restore', 'restored', () => ({
-  // The clock stops at restoration of the service, never at the closing.
-  sql: `status = 'restored', restored_at = now()`,
-  values: [],
-}));
+export const restoreTicket = step(
+  'restore',
+  'restored',
+  () => ({
+    // The clock stops at restoration of the service, never at the closing.
+    sql: `status = 'restored', restored_at = now()`,
+    values: [],
+  }),
+  'ticket.restored',
+);
 
 export const closeTicket = step('close', 'closed', () => ({
   sql: `status = 'closed', closed_at = now()`,
@@ -111,11 +137,16 @@ export const withdrawTicket = step('withdraw', 'withdrawn', () => ({
   values: [],
 }));
 
-export const reopenTicket = step('reopen', 'reopened', (ticket) => {
-  if (!mayReopen(ticket.restoredAt, new Date())) throw new TicketRuleError('too_late');
-  return {
-    sql: `status = 'acknowledged', restored_at = null, closed_at = null,
+export const reopenTicket = step(
+  'reopen',
+  'reopened',
+  (ticket) => {
+    if (!mayReopen(ticket.restoredAt, new Date())) throw new TicketRuleError('too_late');
+    return {
+      sql: `status = 'acknowledged', restored_at = null, closed_at = null,
           reopen_count = reopen_count + 1`,
-    values: [],
-  };
-});
+      values: [],
+    };
+  },
+  'ticket.reopened',
+);
