@@ -114,5 +114,8 @@
   "indicators_not_sent": "Rien n'est parti : {error}",
   "indicators_not_connected": "Cette app n'est pas reliée à Kete Enterprise : les indicateurs restent ici.",
   "status_withdrawn": "retiré",
-  "step_withdraw": "Retirer"
+  "step_withdraw": "Retirer",
+  "task_restore": "Rétablir : {title}",
+  "common_breadcrumb": "Fil d'Ariane",
+  "common_close": "Fermer"
 }

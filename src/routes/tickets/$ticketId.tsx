@@ -1,4 +1,4 @@
-import { Button, EmptyState, Panel, Tag, TextField } from '@kete/design';
+import { Button, EmptyState, PageHeader, Panel, Tag, TextField } from '@kete/design';
 import { createFileRoute, useRouter } from '@tanstack/react-router';
 import { useState } from 'react';
 import { fetchTicket, moveTicket } from '@/features/tickets/functions';
@@ -63,16 +63,28 @@ function TicketPage() {
   return (
     <AppShell>
       <div className="flex flex-col gap-6">
-        <a href="/tickets" className="text-body-sm text-link underline">{m.ticket_back()}</a>
         {!ticket ? (
-          <EmptyState title={m.ticket_not_found()} />
+          <EmptyState
+            title={m.ticket_not_found()}
+            action={
+              <a href="/tickets" className="text-link underline">
+                {m.ticket_back()}
+              </a>
+            }
+          />
         ) : (
           <>
-            <div className="flex flex-wrap items-center gap-2">
-              <h1 className="font-heading text-title font-semibold">{ticket.title}</h1>
-              <Tag>{criticalityLabel(ticket.criticality)}</Tag>
-              <Tag tone="info">{statusLabel(ticket.status)}</Tag>
-            </div>
+            <PageHeader
+              breadcrumbLabel={m.common_breadcrumb()}
+              breadcrumbs={[{ label: m.nav_tickets(), href: '/tickets' }]}
+              title={ticket.title}
+              status={
+                <>
+                  <Tag>{criticalityLabel(ticket.criticality)}</Tag>
+                  <Tag tone="info">{statusLabel(ticket.status)}</Tag>
+                </>
+              }
+            />
             <Panel>
               <dl className="grid gap-2 text-body-sm sm:grid-cols-2">
                 <div><dt className="text-fg-muted">{m.ticket_queue_label()}</dt><dd>{ticket.queueName}</dd></div>

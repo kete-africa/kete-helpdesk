@@ -114,5 +114,8 @@
   "indicators_not_sent": "Nothing left: {error}",
   "indicators_not_connected": "This app is not connected to Kete Enterprise: the indicators stay here.",
   "status_withdrawn": "withdrawn",
-  "step_withdraw": "Withdraw"
+  "step_withdraw": "Withdraw",
+  "task_restore": "Restore: {title}",
+  "common_breadcrumb": "Breadcrumb",
+  "common_close": "Close"
 }
