@@ -5,3 +5,8 @@ allowBuilds:
   cpu-features: false
   protobufjs: false
   ssh2: false
+
+# Kete's own packages are trusted as soon as kete-core publishes them; everything else waits for
+# pnpm's minimum release age.
+minimumReleaseAgeExclude:
+  - '@kete-africa/*'
