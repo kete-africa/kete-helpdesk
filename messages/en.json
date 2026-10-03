@@ -117,5 +117,17 @@
   "step_withdraw": "Withdraw",
   "task_restore": "Restore: {title}",
   "common_breadcrumb": "Breadcrumb",
-  "common_close": "Close"
+  "common_close": "Close",
+  "perm_tickets_read": "See tickets",
+  "perm_tickets_read_body": "Read the queues' tickets, their steps and their deadlines.",
+  "perm_tickets_write": "Open and handle tickets",
+  "perm_tickets_write_body": "Open a ticket, acknowledge, suspend or restore it.",
+  "perm_tickets_manage": "Manage queues and indicators",
+  "perm_tickets_manage_body": "Create queues, link their indicators and send readings to Kete Enterprise.",
+  "perm_journal_read": "Read the journal",
+  "perm_journal_read_body": "See who did what in the app, agents included.",
+  "theme_label": "Appearance",
+  "theme_dark": "Dark",
+  "theme_light": "Light",
+  "theme_auto": "Automatic"
 }

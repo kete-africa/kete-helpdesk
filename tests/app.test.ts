@@ -5,7 +5,7 @@ import type { Caller } from '@kete/capabilities';
 import { executeCommand, readJournal, type CommandDefinition } from '@kete/commands';
 import { assertOrganizationIsolation, createTestSchema, type TestSchema } from '@kete/testing';
 import type { z } from 'zod';
-import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 import { migrations } from '../db/migrations';
 import {
   acknowledgeTicket,
@@ -26,8 +26,9 @@ import {
 } from '../src/features/tickets/domain/clock';
 import { findTicket, listTickets } from '../src/features/tickets/infrastructure/ticket.table';
 import { transaction, usePool } from '../src/platform/db';
+import { validateManifest } from '@kete/sdk';
 import { manifest } from '../src/platform/events';
-import { registry } from '../src/platform/registry';
+import { datasets, registry } from '../src/platform/registry';
 import { asPerson } from '../src/platform/rights';
 import { screenActor } from '../src/platform/session';
 
@@ -193,7 +194,7 @@ describe('a ticket’s life', () => {
 
   it('an agent lists the open tickets as a table its copilot shows', async () => {
     const listed = await asPerson(kofi, () =>
-      registry.invoke({ ...agentFor(kofi), name: 'tickets_list', input: {} }),
+      registry.invoke({ ...agentFor(kofi), name: 'ticket_list', input: {} }),
     );
     expect(listed).toMatchObject({ status: 'done', output: { view: 'table' } });
     expect(queueId).toMatch(/^que_/);
@@ -204,7 +205,7 @@ describe('rights', () => {
   it('nobody signed in may do anything', async () => {
     expect(
       await asPerson(null, () =>
-        registry.invoke({ ...onScreen(ama), name: 'tickets_list', input: {} }),
+        registry.invoke({ ...onScreen(ama), name: 'ticket_list', input: {} }),
       ),
     ).toEqual({ status: 'refused', reason: 'not_allowed' });
   });
@@ -223,6 +224,52 @@ describe('the organization is the boundary', () => {
         );
       },
     });
+  });
+});
+
+describe('the app contract (kete-core specs 045 and 049)', () => {
+  it('declares its tools, its data set and its permissions with their words', () => {
+    const card = manifest();
+    expect(validateManifest(card).ok).toBe(true);
+    expect(card.capabilities?.map((c) => c.name)).toEqual(
+      expect.arrayContaining(['ticket_list', 'ticket_get', 'tickets_open']),
+    );
+    expect(card.datasets?.map((d) => d.name)).toEqual(['tickets']);
+    const manage = card.permissions?.find((p) => p.name === 'tickets:manage');
+    expect(manage).toMatchObject({ roles: ['owner', 'admin'] });
+    expect(manage?.label.fr).toBeTruthy();
+  });
+
+  it('reads its tickets as rows a dashboard sums', async () => {
+    const read = await asPerson(kofi, () => datasets.read(onScreen(kofi), 'tickets', {}));
+    expect(read).toMatchObject({ status: 'done', dataset: 'tickets' });
+  });
+
+  it('follows the grants of Kete Enterprise once it manages Support’s rights', async () => {
+    process.env.ENTERPRISE_API_URL = 'https://api.center.test';
+    vi.stubGlobal('fetch', async () =>
+      Response.json({
+        managed: true,
+        permissions: [{ permission: 'tickets:read', everywhere: false, units: ['unt_sav'] }],
+      }),
+    );
+    try {
+      // Kofi may read, not open: opening was not granted to his position.
+      const opened = await asPerson(
+        kofi,
+        () =>
+          registry.invoke({
+            ...onScreen(kofi),
+            name: 'tickets_open',
+            input: { queueId: 'que_00000000-aaaa', title: 'Onduleur', criticality: 'major' },
+          }),
+        'kofi-token',
+      );
+      expect(opened).toEqual({ status: 'refused', reason: 'not_allowed' });
+    } finally {
+      vi.unstubAllGlobals();
+      delete process.env.ENTERPRISE_API_URL;
+    }
   });
 });
 

@@ -1,24 +1,10 @@
-import { createTokenVerifier, type KeteIdentity } from '@kete/auth';
 import { createMcpHandler, protectedResourceMetadata } from '@kete/capabilities';
 import { keteViews } from '@kete/views';
 import { APP_SLUG, DESIGN, VERSION } from './app';
 import { env } from './env';
+import { bearerOf, identityFromBearer } from './identity';
 import { registry } from './registry';
 import { asPerson, currentIdentity } from './rights';
-
-let verify: ((token: string) => Promise<KeteIdentity>) | undefined;
-
-/** A Compte Kete access token, from an MCP client the person signed in with (Claude, ChatGPT…). */
-async function identityOf(request: Request): Promise<KeteIdentity | null> {
-  const header = request.headers.get('authorization') ?? '';
-  if (!header.startsWith('Bearer ')) return null;
-  verify ??= createTokenVerifier({ issuer: env.accountUrl });
-  try {
-    return await verify(header.slice('Bearer '.length));
-  } catch {
-    return null;
-  }
-}
 
 let handler: ((request: Request) => Promise<Response>) | undefined;
 
@@ -49,8 +35,9 @@ function mcp(): (request: Request) => Promise<Response> {
 
 /** The app's MCP endpoint: its capabilities and their views (doctrine D-037). */
 export async function handleMcp(request: Request): Promise<Response> {
-  const identity = await identityOf(request);
-  return asPerson(identity, () => mcp()(request));
+  const identity = await identityFromBearer(request);
+  // Her grants are read with the token the copilot holds for her.
+  return asPerson(identity, () => mcp()(request), bearerOf(request));
 }
 
 /** Where MCP clients learn that the Compte Kete issues this endpoint's tokens (RFC 9728). */
@@ -58,5 +45,7 @@ export function mcpResourceMetadata(): Response {
   return protectedResourceMetadata({
     resource: `${env.publicUrl}/mcp`,
     authorizationServers: [env.accountUrl],
+    // offline_access: the copilot keeps its access without asking the person again every 15 min.
+    scopes: ['openid', 'profile', 'email', 'offline_access'],
   })();
 }

@@ -1,5 +1,5 @@
-import { createCapabilityRegistry } from '@kete/capabilities';
-import { ticketCapabilities } from '@/features/tickets';
+import { createCapabilityRegistry, createDatasetRegistry } from '@kete/capabilities';
+import { ticketCapabilities, ticketDatasets } from '@/features/tickets';
 import { transaction } from './db';
 import { holds } from './rights';
 
@@ -8,6 +8,15 @@ import { holds } from './rights';
  * rights, same journal, same autonomy rules (@kete/capabilities).
  */
 export const registry = createCapabilityRegistry([...ticketCapabilities], {
+  authorize: async (_caller, permission) => holds(permission),
+  transaction,
+});
+
+/**
+ * What the app exposes to dashboards, the assistant and other apps (kete-core spec 045): data sets
+ * read with the same rights and organization as its capabilities.
+ */
+export const datasets = createDatasetRegistry([...ticketDatasets], {
   authorize: async (_caller, permission) => holds(permission),
   transaction,
 });

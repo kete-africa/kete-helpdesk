@@ -117,5 +117,17 @@
   "step_withdraw": "Retirer",
   "task_restore": "Rétablir : {title}",
   "common_breadcrumb": "Fil d'Ariane",
-  "common_close": "Fermer"
+  "common_close": "Fermer",
+  "perm_tickets_read": "Voir les tickets",
+  "perm_tickets_read_body": "Lire les tickets des files, leurs étapes et leurs délais.",
+  "perm_tickets_write": "Ouvrir et traiter les tickets",
+  "perm_tickets_write_body": "Ouvrir un ticket, le prendre en charge, le suspendre, le rétablir.",
+  "perm_tickets_manage": "Gérer les files et les indicateurs",
+  "perm_tickets_manage_body": "Créer les files, relier leurs indicateurs et envoyer les relevés à Kete Enterprise.",
+  "perm_journal_read": "Lire le journal",
+  "perm_journal_read_body": "Voir qui a fait quoi dans l’app, agents compris.",
+  "theme_label": "Apparence",
+  "theme_dark": "Sombre",
+  "theme_light": "Clair",
+  "theme_auto": "Automatique"
 }

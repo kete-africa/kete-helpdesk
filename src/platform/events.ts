@@ -1,3 +1,4 @@
+import { describePermissions } from '@kete/capabilities';
 import {
   createOutboxRelay,
   httpTransport,
@@ -9,6 +10,9 @@ import {
 import app from '../../kete.json' with { type: 'json' };
 import { PRODUCT, VERSION } from './app';
 import { getPool } from './db';
+import { env } from './env';
+import { datasets, registry } from './registry';
+import { permissions } from './rights';
 
 /** The events this app announces to Kete Cockpit; its manifest declares exactly these. */
 export const DECLARED_EVENTS: string[] = [...app.events];
@@ -18,6 +22,21 @@ function environment(): Manifest['environment'] {
   return value === 'production' || value === 'staging' || value === 'preview'
     ? value
     : 'development';
+}
+
+/** Where agents and other apps reach this app, once its address is known. */
+function endpoints(): { endpoints?: { mcp: string; api: string } } {
+  try {
+    return { endpoints: { mcp: `${env.publicUrl}/mcp`, api: `${env.publicUrl}/api/v1` } };
+  } catch {
+    return {};
+  }
+}
+
+/** The app's client id at the Compte Kete, once registered. */
+function client(): { client?: string } {
+  const id = process.env.KETE_CLIENT_ID;
+  return id ? { client: id } : {};
 }
 
 /** The app's self-description, served at /.well-known/kete. */
@@ -30,6 +49,14 @@ export function manifest(): Manifest {
     events: DECLARED_EVENTS,
     // Who answers for the app, its data, its use of AI, its criticality (doctrine D-040).
     governance: app.governance,
+    // What it exposes, and where (kete-core spec 045): the registry of Kete Enterprise reads them.
+    capabilities: registry.describeAll(),
+    datasets: datasets.describeAll(),
+    // Its permissions and their words (kete-core spec 049): Kete Enterprise lets an administrator
+    // grant them; its client id lets the center accept the app's own tokens.
+    permissions: describePermissions(permissions),
+    ...client(),
+    ...endpoints(),
   });
 }
 
