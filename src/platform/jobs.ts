@@ -1,7 +1,7 @@
 import { createJobs, queuedSender, relayEventsJob, sendEmailJob, type Jobs } from '@kete/jobs';
 import { createMailer, emailSenderFromEnv, type Mailer } from '@kete/notify';
 import { env } from './env';
-import { flushEvents } from './events';
+import { flushCenterEvents, flushEvents } from './events';
 
 let jobs: Jobs | undefined;
 let started: Promise<void> | undefined;
@@ -13,7 +13,11 @@ let started: Promise<void> | undefined;
 export function getJobs(work = false): Jobs {
   jobs ??= createJobs({
     connectionString: env.ownerDatabaseUrl,
-    jobs: [sendEmailJob(emailSenderFromEnv()), relayEventsJob(flushEvents)] as never,
+    // Events to Kete Cockpit (counters) and to Kete Enterprise (business facts), every minute.
+    jobs: [
+      sendEmailJob(emailSenderFromEnv()),
+      relayEventsJob(() => Promise.all([flushEvents(), flushCenterEvents()])),
+    ] as never,
     work,
   });
   return jobs;

@@ -25,3 +25,11 @@ sequenceDiagram
 | `tickets:write`  | owner, admin, member  | open, acknowledge, suspend, restore a ticket         |
 | `tickets:manage` | owner, admin          | queues, their indicators, readings to Kete Enterprise |
 | `journal:read`   | owner, admin          | who did what, agents included                        |
+
+## Events to Kete Enterprise
+
+Opening, restoring and reopening a ticket announce `ticket.opened`, `ticket.restored` and
+`ticket.reopened` — the ticket's id, queue and criticality, never its title — in the same
+transaction (`kete_center_outbox`). The worker delivers them every minute with Support's own token
+(`kete:center`): Kete Enterprise tells them in each person's morning (its spec 025). Support's
+client needs `kete:center` at the Compte Kete: `pnpm clients grant --client <id> --center`.

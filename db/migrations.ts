@@ -34,4 +34,9 @@ export const migrations: Migration[] = [
   { name: '0001_tickets', sql: (context) => ticketsMigrationSql(context) },
   // The journal keeps the chain of agents behind each gesture (doctrine D-039).
   { name: '0002_kete_delegation', sql: (context) => commandsDelegationMigrationSql(context) },
+  // The business events to Kete Enterprise, in their own outbox (kete-core spec 049).
+  {
+    name: '0003_kete_center_outbox',
+    sql: (context) => outboxMigrationSql({ ...context, name: 'kete_center_outbox' }),
+  },
 ];
