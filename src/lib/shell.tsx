@@ -1,6 +1,7 @@
 import { FeedbackButton } from '@kete/feedback/button';
 import { Link } from '@tanstack/react-router';
-import type { ReactNode } from 'react';
+import { applyTheme, ThemeChoice, type ThemeChoiceValue } from '@kete/design';
+import { useEffect, useState, type ReactNode } from 'react';
 import * as m from '@/paraglide/messages.js';
 
 async function sendFeedback(input: object): Promise<void> {
@@ -14,6 +15,11 @@ async function sendFeedback(input: object): Promise<void> {
 
 /** The frame of every signed-in screen: the app, its sections, the feedback button. */
 export function AppShell({ children }: { children: ReactNode }) {
+  const [theme, setTheme] = useState<ThemeChoiceValue>('auto');
+  useEffect(() => {
+    const current = document.documentElement.getAttribute('data-theme');
+    if (current === 'dark' || current === 'light' || current === 'auto') setTheme(current);
+  }, []);
   return (
     <div className="min-h-dvh bg-canvas text-fg">
       <header className="border-b border-line bg-surface">
@@ -53,6 +59,15 @@ export function AppShell({ children }: { children: ReactNode }) {
                 error: m.feedback_error(),
               }}
               onSubmit={sendFeedback}
+            />
+            <ThemeChoice
+              label={m.theme_label()}
+              value={theme}
+              onChange={(choice) => {
+                setTheme(choice);
+                applyTheme(choice);
+              }}
+              labels={{ dark: m.theme_dark(), light: m.theme_light(), auto: m.theme_auto() }}
             />
             <a href="/auth/sortie" className="text-body-sm text-link underline">
               {m.nav_sign_out()}

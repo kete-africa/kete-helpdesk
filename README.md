@@ -19,8 +19,15 @@ flowchart LR
   Q --> K[worker] -->|e-mails| M[MailKite]
   K -->|events| CK[Kete Cockpit]
   W -->|sign-in| A[Compte Kete]
-  W -->|readings| E[Kete Enterprise]
+  W -->|readings · To do · grants| E[Kete Enterprise]
+  O[Other apps · dashboards] -->|/api/v1 capabilities and data sets| W
 ```
+
+**Integrated by its card** (`/.well-known/kete`, kete-core specs 045 and 049): its tools
+(`ticket_list`, `ticket_get`, `tickets_open`), its data set `tickets`, its API, and its permissions
+with their words — Kete Enterprise grants them to positions in Administration › Rights; once it
+does, Support follows those grants instead of its defaults. See
+[rights from Kete Enterprise](docs/flows/rights-from-enterprise.md).
 
 ## Run locally
 

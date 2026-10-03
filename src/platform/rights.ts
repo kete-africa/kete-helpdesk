@@ -1,22 +1,44 @@
 import type { KeteIdentity } from '@kete/auth';
+import { createRights, definePermissions } from '@kete/capabilities';
 import { AsyncLocalStorage } from 'node:async_hooks';
 import { ticketPermissions } from '@/features/tickets';
+import * as m from '@/paraglide/messages.js';
+import { getCenter } from './center';
+import { words } from './words';
 
-export type Role = 'owner' | 'admin' | 'member';
-
-/** What each organization role may do: each feature declares its own permissions. */
-const permissionsByRole: Record<Role, Set<string>> = {
+/**
+ * Every permission Support checks, with its words and its default roles (kete-core spec 049). The
+ * manifest describes them; Kete Enterprise lets an administrator grant them to roles and positions.
+ */
+export const permissions = definePermissions([
+  ...ticketPermissions,
   // The organization's journal: who did what, agents included (@kete/admin).
-  owner: new Set([...ticketPermissions.owner, 'journal:read']),
-  admin: new Set([...ticketPermissions.admin, 'journal:read']),
-  member: new Set(ticketPermissions.member),
-};
+  {
+    name: 'journal:read',
+    label: words(m.perm_journal_read),
+    description: words(m.perm_journal_read_body),
+    roles: ['owner', 'admin'],
+  },
+]);
 
-const current = new AsyncLocalStorage<{ identity: KeteIdentity | null }>();
+const rights = createRights({ permissions, grants: (token) => getCenter().grants(token) });
 
-/** Runs `work` for this person: every right checked within it is hers. */
-export function asPerson<T>(identity: KeteIdentity | null, work: () => T): T {
-  return current.run({ identity }, work);
+const current = new AsyncLocalStorage<{
+  identity: KeteIdentity | null;
+  permissions: Set<string>;
+}>();
+
+/**
+ * Runs `work` for this person: every right checked within it is hers — her grants at Kete
+ * Enterprise, read with her token, or the defaults of her role.
+ */
+export async function asPerson<T>(
+  identity: KeteIdentity | null,
+  work: () => T | Promise<T>,
+  token?: string | null,
+): Promise<T> {
+  const held = identity ? await rights.permissionsOf(identity, token) : new Set<string>();
+  return current.run({ identity, permissions: held }, work);
 }
 
 export function currentIdentity(): KeteIdentity | null {
@@ -28,6 +50,5 @@ export function currentIdentity(): KeteIdentity | null {
  * her runs within her request: it never has more rights than she has (doctrine).
  */
 export function holds(permission: string): boolean {
-  const role = currentIdentity()?.role;
-  return role ? permissionsByRole[role].has(permission) : false;
+  return current.getStore()?.permissions.has(permission) ?? false;
 }

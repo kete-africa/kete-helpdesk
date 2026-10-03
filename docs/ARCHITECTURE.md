@@ -26,7 +26,9 @@ flowchart TB
 | ----------------- | ---------------------------- | ------------------------------------ |
 | Sign-in           | `platform/session.ts`        | `@kete/auth` (Compte Kete)           |
 | Organization data | `platform/db.ts`             | `@kete/tenancy` (RLS)                |
-| Rights            | `platform/rights.ts`         | each feature's `policies.ts`         |
+| Rights            | `platform/rights.ts`         | `@kete/capabilities`, `@kete/center` |
+| Kete Enterprise   | `platform/center.ts`         | `@kete/center`                       |
+| API, data sets    | `platform/api.ts`, `/api/v1` | `@kete/capabilities`                 |
 | Gestures, journal | `features/*/commands`        | `@kete/commands`                     |
 | Agents, drafts    | `platform/registry.ts`       | `@kete/capabilities`, `@kete/drafts` |
 | Copilots          | `platform/mcp.ts`            | `@kete/capabilities`, `@kete/views`  |

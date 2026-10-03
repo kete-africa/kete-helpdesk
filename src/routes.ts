@@ -13,6 +13,7 @@ export const routes = rootRoute('__root.tsx', [
   route('/auth/callback', 'auth/callback.ts'),
   route('/auth/sortie', 'auth/sign-out.ts'),
   route('/mcp', 'api/mcp.ts'),
+  route('/api/v1/$', 'api/v1.ts'),
   route('/api/avis', 'api/feedback.ts'),
   route('/health', 'api/health.ts'),
   route('/.well-known/kete', 'well-known/kete.ts'),

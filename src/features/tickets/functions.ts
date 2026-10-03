@@ -10,7 +10,7 @@ import { env } from '@/platform/env';
 import * as m from '@/paraglide/messages.js';
 import { registry } from '@/platform/registry';
 import { asPerson, holds } from '@/platform/rights';
-import { personOf, screenActor } from '@/platform/session';
+import { personOf, screenActor, tokenOf } from '@/platform/session';
 import {
   acknowledgeTicket,
   closeTicket,
@@ -68,12 +68,16 @@ export class ScreenError extends Error {
 
 /** The person on this screen, in her organization, with her rights for what follows. */
 async function signedIn() {
-  const identity = await personOf(getRequest());
+  const request = getRequest();
+  const identity = await personOf(request);
   if (!identity) throw new ScreenError('signed_out');
   if (!identity.organizationId) throw new ScreenError('no_organization');
+  const token = await tokenOf(request);
   return {
     identity,
     caller: { actor: screenActor(identity), organizationId: identity.organizationId },
+    /** Runs `work` with her rights: her grants at Kete Enterprise, or her role's defaults. */
+    as: <T,>(work: () => T | Promise<T>) => asPerson(identity, work, token),
   };
 }
 
@@ -121,8 +125,8 @@ export const fetchBoard = createServerFn({ method: 'GET' })
     z.object({ open: z.boolean().default(true) }).parse(input ?? {}),
   )
   .handler(async ({ data }) => {
-    const { identity, caller } = await signedIn();
-    return asPerson(identity, async () => {
+    const { identity, caller, as } = await signedIn();
+    return as(async () => {
       if (!holds('tickets:read')) throw new ScreenError('forbidden');
       return transaction(caller.organizationId, async (db) => ({
         queues: await listQueues(db),
@@ -135,8 +139,8 @@ export const fetchBoard = createServerFn({ method: 'GET' })
 export const fetchTicket = createServerFn({ method: 'GET' })
   .validator((input: unknown) => z.object({ ticketId: z.string().min(1).max(80) }).parse(input))
   .handler(async ({ data }) => {
-    const { identity, caller } = await signedIn();
-    return asPerson(identity, async () => {
+    const { identity, caller, as } = await signedIn();
+    return as(async () => {
       if (!holds('tickets:read')) throw new ScreenError('forbidden');
       const ticket = await transaction(caller.organizationId, (db) => findTicket(db, data.ticketId));
       return ticket ? toScreenTicket(ticket) : null;
@@ -147,8 +151,8 @@ export const fetchTicket = createServerFn({ method: 'GET' })
 export const addTicket = createServerFn({ method: 'POST' })
   .validator((input: unknown) => ticketInput.parse(input))
   .handler(async ({ data }) => {
-    const { identity, caller } = await signedIn();
-    const result = await asPerson(identity, () =>
+    const { identity, caller, as } = await signedIn();
+    const result = await as(() =>
       registry.invoke({ ...caller, name: 'tickets_open', input: data }),
     );
     return { status: result.status };
@@ -176,8 +180,8 @@ export const moveTicket = createServerFn({ method: 'POST' })
       .parse(input),
   )
   .handler(async ({ data }) => {
-    const { identity, caller } = await signedIn();
-    return asPerson(identity, async () => {
+    const { identity, caller, as } = await signedIn();
+    return as(async () => {
       if (!holds('tickets:write')) return { ok: false, error: 'forbidden' };
       try {
         await transaction(caller.organizationId, (db) =>
@@ -203,8 +207,8 @@ export const moveTicket = createServerFn({ method: 'POST' })
 export const addQueue = createServerFn({ method: 'POST' })
   .validator((input: unknown) => queueInput.parse(input))
   .handler(async ({ data }) => {
-    const { identity, caller } = await signedIn();
-    return asPerson(identity, async () => {
+    const { identity, caller, as } = await signedIn();
+    return as(async () => {
       if (!holds('tickets:manage')) throw new ScreenError('forbidden');
       await transaction(caller.organizationId, (db) =>
         executeCommand(db, createQueue, {
@@ -227,8 +231,8 @@ const period = z.object({
 export const fetchIndicators = createServerFn({ method: 'GET' })
   .validator((input: unknown) => period.parse(input))
   .handler(async ({ data }) => {
-    const { identity, caller } = await signedIn();
-    return asPerson(identity, async () => {
+    const { identity, caller, as } = await signedIn();
+    return as(async () => {
       if (!holds('tickets:read')) throw new ScreenError('forbidden');
       const queues = await transaction(caller.organizationId, async (db) => {
         const all = await listQueues(db);
@@ -252,9 +256,9 @@ export const publishIndicator = createServerFn({ method: 'POST' })
     period.extend({ queueId: z.string().min(1).max(80) }).parse(input),
   )
   .handler(async ({ data }) => {
-    const { identity, caller } = await signedIn();
+    const { identity, caller, as } = await signedIn();
     const request = getRequest();
-    return asPerson(identity, async () => {
+    return as(async () => {
       if (!holds('tickets:manage')) return { ok: false, error: 'forbidden', sent: 0 };
       const found = await transaction(caller.organizationId, async (db) => {
         const queue = (await listQueues(db)).find((q) => q.queueId === data.queueId);
@@ -281,8 +285,8 @@ export const publishIndicator = createServerFn({ method: 'POST' })
 export const fetchReview = createServerFn({ method: 'GET' })
   .validator((input: unknown) => z.object({ draftId: z.string().min(1).max(128) }).parse(input))
   .handler(async ({ data }) => {
-    const { identity, caller } = await signedIn();
-    const review = await asPerson(identity, () => registry.review(caller, data.draftId));
+    const { identity, caller, as } = await signedIn();
+    const review = await as(() => registry.review(caller, data.draftId));
     return review ? toScreen(review) : null;
   });
 
@@ -305,8 +309,8 @@ export const decideReview = createServerFn({ method: 'POST' })
       .parse(input),
   )
   .handler(async ({ data }) => {
-    const { identity, caller } = await signedIn();
-    const decided = await asPerson(identity, () =>
+    const { identity, caller, as } = await signedIn();
+    const decided = await as(() =>
       data.action === 'validate'
         ? registry.decide({ ...caller, draftId: data.draftId, action: 'validate', confirmed: data.confirmed })
         : registry.decide({ ...caller, draftId: data.draftId, action: 'refuse', reason: data.reason }),

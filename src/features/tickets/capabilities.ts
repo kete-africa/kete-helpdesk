@@ -1,41 +1,30 @@
 import { defineCapability } from '@kete/capabilities';
-import { tableView, VIEWS } from '@kete/views';
+import { exposeRecord } from '@kete/views';
 import { z } from 'zod';
 import * as m from '@/paraglide/messages.js';
 import { openTicket } from './commands';
-import { listTickets } from './infrastructure/ticket.table';
-import { ticketInput } from './ticket.record';
+import { findTicket, searchTickets } from './infrastructure/ticket.table';
+import { ticketInput, type Ticket } from './ticket.record';
 
 /** What agents may do with tickets — through MCP, the chat or another app — and how far alone. */
 export const ticketCapabilities = [
-  // Level 1: reads, shown as a table in a copilot.
-  defineCapability({
-    name: 'tickets_list',
-    description:
-      'Lists the open tickets, most critical first: queue, title, criticality, status, assignee.',
+  // Level 1, by the integration contract (kete-core spec 045): `ticket_list` and `ticket_get`, a
+  // table and a record a copilot shows, under the read permission — no integration code to write.
+  ...exposeRecord<Ticket>({
+    type: 'ticket',
+    description: 'the open tickets of the queues, most critical first',
     permission: 'tickets:read',
-    autonomy: 1,
-    input: z.object({}),
-    view: VIEWS.table,
-    async run(_input, { db }) {
-      const tickets = await listTickets(db, { open: true });
-      return tableView({
-        title: m.tickets_table_title(),
-        empty: m.tickets_table_empty(),
-        columns: [
-          { key: 'queue', label: m.ticket_queue_label() },
-          { key: 'title', label: m.ticket_title_label() },
-          { key: 'criticality', label: m.ticket_criticality_label() },
-          { key: 'status', label: m.ticket_status_label() },
-        ],
-        rows: tickets.map((t) => ({
-          queue: t.queueName,
-          title: t.title,
-          criticality: t.criticality,
-          status: t.status,
-        })),
-      });
-    },
+    title: m.tickets_table_title,
+    empty: m.tickets_table_empty,
+    columns: [
+      { key: 'queue', label: m.ticket_queue_label, value: (t) => t.queueName },
+      { key: 'title', label: m.ticket_title_label, value: (t) => t.title },
+      { key: 'criticality', label: m.ticket_criticality_label, value: (t) => t.criticality },
+      { key: 'status', label: m.ticket_status_label, value: (t) => t.status },
+    ],
+    list: (db, query) => searchTickets(db, query),
+    get: (db, id) => findTicket(db, id),
+    label: (t) => t.title,
   }),
   // Level 2: opening a ticket for the person commits nothing irreversible.
   defineCapability({

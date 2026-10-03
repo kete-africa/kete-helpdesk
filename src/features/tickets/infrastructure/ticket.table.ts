@@ -194,3 +194,37 @@ export async function updateTicket(
 ): Promise<void> {
   await db.query(`update tickets set ${sql} where ticket_id = $1`, [ticketId, ...values]);
 }
+
+/** Open tickets matching a free text (or all), most critical first: what a copilot searches. */
+export async function searchTickets(
+  db: SqlExecutor,
+  query: { text?: string | undefined; limit: number },
+): Promise<Ticket[]> {
+  const { rows } = await db.query<Row>(
+    `select ${columns} from tickets t join queues q on q.queue_id = t.queue_id
+      where t.status not in ('restored', 'closed', 'withdrawn')
+        and ($1::text is null or t.title ilike '%' || $1 || '%' or t.description ilike '%' || $1 || '%'
+             or q.name ilike '%' || $1 || '%')
+      order by case t.criticality when 'critical' then 0 when 'major' then 1
+                 when 'standard' then 2 else 3 end, t.received_at
+      limit $2`,
+    [query.text?.trim() || null, query.limit],
+  );
+  return rows.map(toTicket);
+}
+
+/** Tickets received within a period, for the data set: newest first, at most `limit`. */
+export async function ticketsReceivedBetween(
+  db: SqlExecutor,
+  query: { from?: string | undefined; to?: string | undefined; limit: number },
+): Promise<Ticket[]> {
+  const { rows } = await db.query<Row>(
+    `select ${columns} from tickets t join queues q on q.queue_id = t.queue_id
+      where ($1::date is null or t.received_at >= $1::date)
+        and ($2::date is null or t.received_at < $2::date + 1)
+      order by t.received_at desc
+      limit $3`,
+    [query.from ?? null, query.to ?? null, query.limit],
+  );
+  return rows.map(toTicket);
+}
