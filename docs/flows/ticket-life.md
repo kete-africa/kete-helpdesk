@@ -47,3 +47,21 @@ sequenceDiagram
 ```
 
 Without `ENTERPRISE_API_URL`, the indicators stay in the app.
+
+## The ticket in its holder's To do in Kete Enterprise
+
+Acknowledged, resumed or reopened, a ticket is a task « Rétablir : … » in its holder's one To do
+in Kete Enterprise, due at its criticality's deadline (suspensions added), sent with her token.
+Restored, withdrawn, suspended or closed, the task leaves. The central assistant also reaches
+this app's tools through its MCP endpoint, with the person's token (Enterprise spec 018).
+
+```mermaid
+sequenceDiagram
+  participant T as Technician
+  participant H as kete-helpdesk
+  participant E as Kete Enterprise
+  T->>H: Acknowledge
+  H->>E: POST /v1/workspace/tasks (her token, due at the deadline)
+  T->>H: Service restored
+  H->>E: POST /v1/workspace/tasks/close
+```

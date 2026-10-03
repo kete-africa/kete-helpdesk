@@ -1,4 +1,4 @@
-import { Button, Panel, Tag, TextField } from '@kete/design';
+import { Button, KpiGrid, KpiTile, PageHeader, Panel, Tag, TextField } from '@kete/design';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useState } from 'react';
 import { fetchIndicators, publishIndicator } from '@/features/tickets/functions';
@@ -47,8 +47,7 @@ function IndicatorsPage() {
   return (
     <AppShell>
       <div className="flex flex-col gap-6">
-        <h1 className="font-heading text-headline font-semibold">{m.indicators_title()}</h1>
-        <p className="text-fg-muted">{m.indicators_explain()}</p>
+        <PageHeader title={m.indicators_title()} description={m.indicators_explain()} />
         <Panel>
           <div className="flex flex-wrap items-end gap-3">
             <TextField label={m.indicators_label()} value={period.label} onChange={(e) => setPeriod({ ...period, label: e.target.value })} />
@@ -59,11 +58,11 @@ function IndicatorsPage() {
         </Panel>
         {data.queues.map((q) => (
           <Panel key={q.queueId} title={q.name}>
-            <div className="grid gap-3 sm:grid-cols-3">
-              <div><p className="text-body-sm text-fg-muted">{m.indicators_restored()}</p><p className="font-number text-title font-semibold">{q.restored}</p></div>
-              <div><p className="text-body-sm text-fg-muted">{m.indicators_within()}</p><p className="font-number text-title font-semibold">{percent(q.rate)}</p></div>
-              <div><p className="text-body-sm text-fg-muted">{m.indicators_reopened()}</p><p className="font-number text-title font-semibold">{percent(q.reopenRate)}</p></div>
-            </div>
+            <KpiGrid label={q.name}>
+              <KpiTile label={m.indicators_restored()} value={q.restored} />
+              <KpiTile label={m.indicators_within()} value={percent(q.rate)} />
+              <KpiTile label={m.indicators_reopened()} value={percent(q.reopenRate)} />
+            </KpiGrid>
             <div className="mt-3 flex flex-wrap gap-2">
               {q.indicators.map((name) => <Tag key={name}>{name}</Tag>)}
             </div>

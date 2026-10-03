@@ -21,8 +21,8 @@ importers:
         specifier: npm:@kete-africa/commands@^0.2.0
         version: '@kete-africa/commands@0.2.0(drizzle-orm@0.45.3(@types/pg@8.23.1)(kysely@0.28.17)(pg@8.23.1))'
       '@kete/design':
-        specifier: npm:@kete-africa/design@^0.2.0
-        version: '@kete-africa/design@0.2.0(react@19.3.0)'
+        specifier: npm:@kete-africa/design@^0.3.0
+        version: '@kete-africa/design@0.3.0(react@19.3.0)'
       '@kete/drafts':
         specifier: npm:@kete-africa/drafts@^0.1.1
         version: '@kete-africa/drafts@0.1.1(drizzle-orm@0.45.3(@types/pg@8.23.1)(kysely@0.28.17)(pg@8.23.1))'
@@ -534,6 +534,11 @@ packages:
     peerDependencies:
       react: ^19
 
+  '@kete-africa/design@0.3.0':
+    resolution: {integrity: sha512-FGzqW4fuL23M0DbALtBn9A3Hsjj3JfrKaru9s0BjSvA4KCaI2a4GMV0yrNk7JjJt27bU5MPtlKMYcnJGBbFI2A==, tarball: https://npm.pkg.github.com/download/@kete-africa/design/0.3.0/7ea24ce2475d7d757252edc0a570c9c919a4d771}
+    peerDependencies:
+      react: ^19
+
   '@kete-africa/drafts@0.1.1':
     resolution: {integrity: sha512-RhcesoPt5EZYK9cxt4+1n18uEqHEdB6hgPAXzkQEHpIEJKcukh0nfG0madcObGdfw5pRCeWZHolWNJpefMiPIg==, tarball: https://npm.pkg.github.com/download/@kete-africa/drafts/0.1.1/e47337f713c7b11eec08f5cde5dc611ebda20102}
 
@@ -546,6 +551,9 @@ packages:
     resolution: {integrity: sha512-vEf/bgwOyrx28pwJu+NZ5cpJdyTeKLMr1G4EIqLr79RnjRqQDsv0BhGF5h8vcl6jR9dCM8TCGRHzKxOlAautMA==, tarball: https://npm.pkg.github.com/download/@kete-africa/jobs/0.1.0/35cadaddb703e139d81c7faa36a8f2c51920d3e3}
     peerDependencies:
       '@kete/notify': 0.1.0@kete-africa/notify@*
+    peerDependenciesMeta:
+      '@kete/notify':
+        optional: true
 
   '@kete-africa/notify@0.1.0':
     resolution: {integrity: sha512-W5YsMFkMEgpHLR3wYgDh2ydgF0jKcyZzJO0hSokFNsu9XCzJZtzTShdafUgp3XDtqzeH8nYFK+3Jncg7ghfL4w==, tarball: https://npm.pkg.github.com/download/@kete-africa/notify/0.1.0/31ebe4cde4a477b41d2dfb24418b25059b0e546b}
@@ -563,6 +571,9 @@ packages:
     resolution: {integrity: sha512-9CeMDHeoT5cvEbidExebE4ljN0GswsW7ZTpKRJjD7D4TiSdcGXrSCh/zv+TB1ZD5sbJ8tCAOYyTvCHWadFliyQ==, tarball: https://npm.pkg.github.com/download/@kete-africa/tenancy/0.1.1/880180dae326ad193f4c8f665e99e45e69272ff4}
     peerDependencies:
       drizzle-orm: '>=0.45'
+    peerDependenciesMeta:
+      drizzle-orm:
+        optional: true
 
   '@kete-africa/testing@0.1.0':
     resolution: {integrity: sha512-5GMpbYk3GeEcfr3ZeLITvIp1mG7qVByhAw2Uw4T3Xx44YIKYgEftNtSbVf1Yl867V9464MTuQooXKmyWvrn7dQ==, tarball: https://npm.pkg.github.com/download/@kete-africa/testing/0.1.0/926f7004e1a5a223c2fc13002e77c860cb35ae47}
@@ -3634,6 +3645,17 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
+  '@kete-africa/design@0.3.0(react@19.3.0)':
+    dependencies:
+      '@fontsource-variable/archivo': 5.3.0
+      '@fontsource-variable/instrument-sans': 5.3.0
+      '@fontsource-variable/inter': 5.3.0
+      '@fontsource-variable/jetbrains-mono': 5.3.0
+      '@google/design.md': 0.4.0
+      react: 19.3.0
+    transitivePeerDependencies:
+      - supports-color
+
   '@kete-africa/drafts@0.1.1(drizzle-orm@0.45.3(@types/pg@8.23.1)(kysely@0.28.17)(pg@8.23.1))':
     dependencies:
       '@kete/commands': '@kete-africa/commands@0.2.0(drizzle-orm@0.45.3(@types/pg@8.23.1)(kysely@0.28.17)(pg@8.23.1))'
@@ -3659,8 +3681,9 @@ snapshots:
 
   '@kete-africa/jobs@0.1.0(@kete-africa/notify@0.1.0(react-dom@19.3.0(react@19.3.0))(react@19.3.0))':
     dependencies:
-      '@kete/notify': '@kete-africa/notify@0.1.0(react-dom@19.3.0(react@19.3.0))(react@19.3.0)'
       pg-boss: 12.35.0
+    optionalDependencies:
+      '@kete/notify': '@kete-africa/notify@0.1.0(react-dom@19.3.0(react@19.3.0))(react@19.3.0)'
     transitivePeerDependencies:
       - pg-native
 
@@ -3688,6 +3711,7 @@ snapshots:
   '@kete-africa/tenancy@0.1.1(drizzle-orm@0.45.3(@types/pg@8.23.1)(kysely@0.28.17)(pg@8.23.1))':
     dependencies:
       '@kete/sdk': '@kete-africa/sdk@0.3.0'
+    optionalDependencies:
       drizzle-orm: 0.45.3(@types/pg@8.23.1)(kysely@0.28.17)(pg@8.23.1)
     transitivePeerDependencies:
       - pg-native
@@ -4793,6 +4817,7 @@ snapshots:
       '@types/pg': 8.23.1
       kysely: 0.28.17
       pg: 8.23.1
+    optional: true
 
   dunder-proto@1.0.1:
     dependencies:

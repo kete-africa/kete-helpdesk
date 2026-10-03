@@ -38,3 +38,38 @@ export async function sendReading(
   const answer = (await response.json().catch(() => ({}))) as { error?: string };
   return { ok: false, error: answer.error ?? `http_${response.status}` };
 }
+
+/**
+ * Puts a task in the person's one To do in Kete Enterprise (its spec 018), with her token: what
+ * she took here and must finish, with its deadline. Sending it again updates it. Without
+ * `ENTERPRISE_API_URL`, or when Enterprise does not answer, the app goes on alone.
+ */
+export async function sendTask(
+  request: Request,
+  task: { key: string; title: string; href: string; dueAt?: string },
+): Promise<void> {
+  await toEnterprise(request, '/v1/workspace/tasks', { ...task, source: 'kete-helpdesk' });
+}
+
+/** Takes a task out of the person's To do in Kete Enterprise, once it is done here. */
+export async function closeTask(request: Request, key: string): Promise<void> {
+  await toEnterprise(request, '/v1/workspace/tasks/close', { key, source: 'kete-helpdesk' });
+}
+
+async function toEnterprise(request: Request, path: string, body: object): Promise<void> {
+  const base = enterpriseUrl();
+  if (!base) return;
+  const token = await getSignIn().accessToken(request);
+  if (!token) return;
+  await fetch(`${base}${path}`, {
+    method: 'POST',
+    headers: {
+      authorization: `Bearer ${token}`,
+      'content-type': 'application/json',
+      'idempotency-key': crypto.randomUUID(),
+      'kete-channel': 'api',
+    },
+    body: JSON.stringify(body),
+    signal: AbortSignal.timeout(4000),
+  }).catch(() => undefined);
+}
