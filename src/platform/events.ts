@@ -9,6 +9,7 @@ import {
   type Manifest,
 } from '@kete/sdk';
 import { z } from 'zod';
+import { billingEvents } from '@/features/billing';
 import { ticketEvents } from '@/features/tickets';
 import app from '../../kete.json' with { type: 'json' };
 import { CENTER_OUTBOX } from './announce';
@@ -61,7 +62,7 @@ export function manifest(): Manifest {
     // grant them; its client id lets the center accept the app's own tokens.
     permissions: describePermissions(permissions),
     // The business events it announces to Kete Enterprise, and their data (kete-core spec 049).
-    emits: ticketEvents.map((e) => ({
+    emits: [...ticketEvents, ...billingEvents].map((e) => ({
       type: e.type,
       description: e.description,
       classification: e.classification,

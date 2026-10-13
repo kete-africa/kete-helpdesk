@@ -2,6 +2,7 @@ import { commandsDelegationMigrationSql, commandsMigrationSql } from '@kete/comm
 import { draftsMigrationSql } from '@kete/drafts';
 import { feedbackMigrationSql } from '@kete/feedback';
 import { outboxMigrationSql } from '@kete/sdk';
+import { billingMigrationSql } from '@/features/billing';
 import { ticketsMigrationSql } from '@/features/tickets';
 
 export interface MigrationContext {
@@ -39,4 +40,6 @@ export const migrations: Migration[] = [
     name: '0003_kete_center_outbox',
     sql: (context) => outboxMigrationSql({ ...context, name: 'kete_center_outbox' }),
   },
+  // Who pays for a ticket, and its interventions (spec 005).
+  { name: '0004_billing', sql: (context) => billingMigrationSql(context) },
 ];

@@ -1,6 +1,8 @@
 import { Button, EmptyState, PageHeader, Panel, Tag, TextField } from '@kete/design';
 import { createFileRoute, useRouter } from '@tanstack/react-router';
 import { useState } from 'react';
+import { fetchBilling } from '@/features/billing/functions';
+import { BillingPanel } from '@/features/billing/ui/BillingPanel';
 import { fetchTicket, moveTicket } from '@/features/tickets/functions';
 import { AppShell } from '@/lib/shell';
 import { requirePerson } from '@/lib/signed-in';
@@ -10,7 +12,10 @@ import { criticalityLabel, statusLabel } from '@/features/tickets/ui/labels';
 
 export const Route = createFileRoute('/tickets/$ticketId')({
   beforeLoad: ({ location }) => requirePerson(location.href),
-  loader: ({ params }) => fetchTicket({ data: { ticketId: params.ticketId } }),
+  loader: async ({ params }) => ({
+    ticket: await fetchTicket({ data: { ticketId: params.ticketId } }),
+    billing: await fetchBilling({ data: { ticketId: params.ticketId } }),
+  }),
   component: TicketPage,
 });
 
@@ -29,7 +34,7 @@ function refusal(code: string | null): string {
 
 /** One ticket: its clock — from acknowledgement to restoration, suspensions out — and its steps. */
 function TicketPage() {
-  const ticket = Route.useLoaderData();
+  const { ticket, billing } = Route.useLoaderData();
   const router = useRouter();
   const [reason, setReason] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -120,6 +125,7 @@ function TicketPage() {
               </div>
               {error && <p role="alert" className="mt-2 text-body-sm text-state-error-fg">{error}</p>}
             </Panel>
+            {billing && <BillingPanel ticketId={ticket.ticketId} loaded={billing} />}
           </>
         )}
       </div>
