@@ -279,6 +279,7 @@ describe('the business events to Kete Enterprise (kete-core spec 049)', () => {
       'ticket.opened',
       'ticket.restored',
       'ticket.reopened',
+      'ticket.invoice_prepared',
     ]);
     const { rows } = await db.owner.query<{ envelope: { type: string; data: object } }>(
       `select envelope from ${db.schema}.kete_center_outbox order by created_at`,

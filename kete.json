@@ -9,7 +9,8 @@
       "contact": "support@kete.africa"
     },
     "dataCategories": [
-      "personal"
+      "personal",
+      "financial"
     ],
     "ai": {
       "used": false

@@ -62,3 +62,17 @@ start-up) and the worker (`pnpm worker`). An operator registers the app at the C
 | --- | --- | --- | --- |
 | owner, admin | yes | yes | yes |
 | member | yes | yes | no |
+
+## Who pays (spec 005)
+
+A ticket says who pays — warranty, maintenance contract, or billable to the client. Its
+interventions (time, rate, parts) are recorded with their cost; a billable ticket's become a
+draft invoice in **Kete Finance**, asked with the person's token and issued there by who issues
+invoices. `FINANCE_URL` names Kete Finance's address; without it, nothing is prepared.
+
+```mermaid
+flowchart LR
+  T[Ticket · billable] --> I[Interventions: time, rate, parts]
+  I -->|tickets_prepare_invoice| F[Kete Finance: a draft invoice]
+  F -->|verified and issued there| N[F-2026-00xx]
+```

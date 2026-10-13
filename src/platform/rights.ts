@@ -1,10 +1,12 @@
 import type { KeteIdentity } from '@kete/auth';
 import { createRights, definePermissions } from '@kete/capabilities';
 import { AsyncLocalStorage } from 'node:async_hooks';
+import { billingPermissions } from '@/features/billing';
 import { ticketPermissions } from '@/features/tickets';
 import * as m from '@/paraglide/messages.js';
 import { getCenter } from './center';
 import { words } from './words';
+import { withPerson } from './person';
 
 /**
  * Every permission Support checks, with its words and its default roles (kete-core spec 049). The
@@ -12,6 +14,7 @@ import { words } from './words';
  */
 export const permissions = definePermissions([
   ...ticketPermissions,
+  ...billingPermissions,
   // The organization's journal: who did what, agents included (@kete/admin).
   {
     name: 'journal:read',
@@ -38,7 +41,10 @@ export async function asPerson<T>(
   token?: string | null,
 ): Promise<T> {
   const held = identity ? await rights.permissionsOf(identity, token) : new Set<string>();
-  return current.run({ identity, permissions: held }, work);
+  // Her token and her name, for what a gesture asks another app while it runs.
+  return current.run({ identity, permissions: held }, () =>
+    withPerson({ token, name: identity?.name }, work),
+  );
 }
 
 export function currentIdentity(): KeteIdentity | null {

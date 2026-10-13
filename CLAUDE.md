@@ -4,8 +4,10 @@
 
 ## What this app is
 
-A Kete App, born from `kete-core`'s template (spec 029). Replace this paragraph with what the app
-does, for whom, and its first features.
+Support, behind Kete Enterprise: tickets in queues with their clock — from acknowledgement to
+restoration, suspensions out — and who pays for each: the warranty, the client's contract, or the
+client, whose interventions become a draft invoice in Kete Finance (spec 005). One of the four
+generic apps of the doctrine (D-048). Third parties and projects are the center's (D-047).
 
 ## Read before any action
 
