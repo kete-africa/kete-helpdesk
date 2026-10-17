@@ -48,12 +48,15 @@ sequenceDiagram
 
 Without `ENTERPRISE_API_URL`, the indicators stay in the app.
 
-## The ticket in its holder's To do in Kete Enterprise
+## The ticket in its holder's hands, at Kete Enterprise (spec 006)
 
-Acknowledged, resumed or reopened, a ticket is a task « Rétablir : … » in its holder's one To do
-in Kete Enterprise, due at its criticality's deadline (suspensions added), sent with her token.
-Restored, withdrawn, suspended or closed, the task leaves. The central assistant also reaches
-this app's tools through its MCP endpoint, with the person's token (Enterprise spec 018).
+A ticket taken is a holding of its assignee at Kete Enterprise (kete-core spec 114): « Rétablir :
+… », due on the day of its criticality's deadline (suspensions added). Suspended or restored, it
+waits on its requester; closed or withdrawn, it is no longer said and the center finishes it. The
+app says every ticket in someone's hands at once, with its own token, after each step and every
+minute — the center keeps them in « Pour moi » and relays them when the holder is away. A ticket
+nobody took has no holder yet. The central assistant also reaches this app's tools through its MCP
+endpoint, with the person's token (Enterprise spec 018).
 
 ```mermaid
 sequenceDiagram
@@ -61,7 +64,10 @@ sequenceDiagram
   participant H as kete-helpdesk
   participant E as Kete Enterprise
   T->>H: Acknowledge
-  H->>E: POST /v1/workspace/tasks (her token, due at the deadline)
+  H->>E: PUT /public/apps/holdings (its own token: every ticket in someone's hands)
+  E-->>T: « Pour moi » · due at the deadline
   T->>H: Service restored
-  H->>E: POST /v1/workspace/tasks/close
+  H->>E: PUT /public/apps/holdings (now waiting on the requester)
+  T->>H: Closed
+  H->>E: PUT /public/apps/holdings (no longer said: finished)
 ```

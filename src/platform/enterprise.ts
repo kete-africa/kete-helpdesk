@@ -23,16 +23,3 @@ export async function sendReading(
 ): Promise<{ ok: boolean; error: string | null }> {
   return getCenter().sendReading(await tokenOf(request), reading);
 }
-
-/** Puts a task in the person's one To do; sending it again updates it. */
-export async function sendTask(
-  request: Request,
-  task: { key: string; title: string; href: string; dueAt?: string },
-): Promise<void> {
-  await getCenter().sendTask(await tokenOf(request), task);
-}
-
-/** Takes a task out of the person's To do, once it is done here. */
-export async function closeTask(request: Request, key: string): Promise<void> {
-  await getCenter().closeTask(await tokenOf(request), key);
-}

@@ -13,7 +13,9 @@ export class BillingRuleError extends RuleError {
       | 'client_required'
       | 'nothing_to_invoice'
       | 'finance_not_connected'
-      | 'finance_refused',
+      | 'finance_refused'
+      | 'refused_by_policy'
+      | 'approval_required',
     facts: Record<string, string | number> = {},
   ) {
     super(code, facts);

@@ -19,7 +19,7 @@ flowchart LR
   Q --> K[worker] -->|e-mails| M[MailKite]
   K -->|events| CK[Kete Cockpit]
   W -->|sign-in| A[Compte Kete]
-  W -->|readings · To do · grants| E[Kete Enterprise]
+  W -->|readings · holdings · grants| E[Kete Enterprise]
   O[Other apps · dashboards] -->|/api/v1 capabilities and data sets| W
 ```
 

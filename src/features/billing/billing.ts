@@ -5,8 +5,10 @@ import { z } from 'zod';
 import { findTicket } from '@/features/tickets';
 import * as m from '@/paraglide/messages.js';
 import { announce } from '@/platform/announce';
+import { PRODUCT } from '@/platform/app';
 import { getCenter } from '@/platform/center';
 import { actingFor, currentToken } from '@/platform/person';
+import { passGesture, sentencesOf } from '@/platform/policies';
 import { words } from '@/platform/words';
 import { billingKinds, BillingRuleError, costOf } from './domain/billing';
 import { prepareInvoice } from './finance';
@@ -120,13 +122,33 @@ export const prepareTicketInvoice = defineCommand({
   name: 'prepare-ticket-invoice',
   input: invoiceAsk,
   reversibility: { reversible: false },
-  async handler(input, { db, organizationId }) {
+  async handler(input, { db, organizationId, actor }) {
     const ticket = await findTicket(db, input.ticketId);
     if (!ticket) throw new BillingRuleError('ticket_not_found');
     const billing = await billingOf(db, input.ticketId);
     if (billing?.kind !== 'billable') throw new BillingRuleError('not_billable');
     const open = (await interventionsOf(db, input.ticketId)).filter((one) => !one.invoiceDraftId);
     if (open.length === 0) throw new BillingRuleError('nothing_to_invoice');
+    // Invoicing a client commits the organization: its policies decide, at the center (kete-core
+    // spec 114) — the same for a person and her agent. Unruled, this app's rules are enough.
+    const verdict = await passGesture(currentToken(), actor, {
+      kind: 'invoice.issue',
+      object: billing.partyId
+        ? { kind: 'party', id: billing.partyId }
+        : billing.projectId
+          ? { kind: 'project', id: billing.projectId }
+          : { kind: 'subject', id: `${PRODUCT}.invoice` },
+      amount: { value: open.reduce((sum, one) => sum + one.amount, 0), currency: CURRENCY },
+    });
+    if (verdict.effect === 'refuse') {
+      throw new BillingRuleError('refused_by_policy', { reason: sentencesOf(verdict) });
+    }
+    if (verdict.effect === 'approve') {
+      throw new BillingRuleError('approval_required', {
+        who: verdict.approvers.map((a) => a.approver).join(', '),
+        reason: sentencesOf(verdict),
+      });
+    }
     const lines = open.flatMap((one) => {
       const time = one.amount - one.parts;
       const hours = Math.round((one.minutes / 60) * 100) / 100;

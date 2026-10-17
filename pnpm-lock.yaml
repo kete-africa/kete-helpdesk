@@ -18,8 +18,8 @@ importers:
         specifier: npm:@kete-africa/capabilities@^0.5.0
         version: '@kete-africa/capabilities@0.5.0(drizzle-orm@0.45.3(@types/pg@8.23.1)(kysely@0.28.17)(pg@8.23.1))'
       '@kete/center':
-        specifier: npm:@kete-africa/center@^0.5.0
-        version: '@kete-africa/center@0.5.0'
+        specifier: npm:@kete-africa/center@^0.7.0
+        version: '@kete-africa/center@0.7.0'
       '@kete/commands':
         specifier: npm:@kete-africa/commands@^0.2.0
         version: '@kete-africa/commands@0.2.0(drizzle-orm@0.45.3(@types/pg@8.23.1)(kysely@0.28.17)(pg@8.23.1))'
@@ -538,8 +538,8 @@ packages:
   '@kete-africa/capabilities@0.5.0':
     resolution: {integrity: sha512-6Sqc9m2h7Y8yMkxD43vzLFuCsWCKX+0N9MgzQN2e16mN9V7fjYPEcvUBQOsIaCdCsWHpANFgZM4R5m+aauVOzw==, tarball: https://npm.pkg.github.com/download/@kete-africa/capabilities/0.5.0/322837df52609530113ec933471c62f54de12efa}
 
-  '@kete-africa/center@0.5.0':
-    resolution: {integrity: sha512-IJzpZXkEk0o0voAtVbWiWKaVeng/5CNTXPCvyTH3IE329niFYsXt4PByMri7yV7T0LkQ7aCicy2jpUZRoiAEwA==, tarball: https://npm.pkg.github.com/download/@kete-africa/center/0.5.0/cdd3ebe0c7f76c145d36376c645c198fb96030d0}
+  '@kete-africa/center@0.7.0':
+    resolution: {integrity: sha512-G1DuZPh7NsZ4XiNvC8ZyWcF/Yk7UQtx2lODRzFKnLfFrhbGRzei83leBi9/isyMiJutTvsy6XQLhIlAFlacQrg==, tarball: https://npm.pkg.github.com/download/@kete-africa/center/0.7.0/d2998bf4eb4464112a75cacf4a6d08ce4c4fe98c}
 
   '@kete-africa/commands@0.2.0':
     resolution: {integrity: sha512-/uLLszL5C8CXzXZk6v7+jyWMCB0yG+eJDZ9JdDKHtTyc8esvUt1CyOMUbA4AbJz9+9ZZIVskrbIjpabypv2P/w==, tarball: https://npm.pkg.github.com/download/@kete-africa/commands/0.2.0/f0c9b37636e81c356275698065a86ee90114e76a}
@@ -3942,7 +3942,7 @@ snapshots:
       - drizzle-orm
       - pg-native
 
-  '@kete-africa/center@0.5.0': {}
+  '@kete-africa/center@0.7.0': {}
 
   '@kete-africa/commands@0.2.0(drizzle-orm@0.45.3(@types/pg@8.23.1)(kysely@0.28.17)(pg@8.23.1))':
     dependencies:

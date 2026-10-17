@@ -3,7 +3,7 @@ import { draftsMigrationSql } from '@kete/drafts';
 import { feedbackMigrationSql } from '@kete/feedback';
 import { outboxMigrationSql } from '@kete/sdk';
 import { billingMigrationSql } from '@/features/billing';
-import { ticketsMigrationSql } from '@/features/tickets';
+import { ticketOrganizationsMigrationSql, ticketsMigrationSql } from '@/features/tickets';
 
 export interface MigrationContext {
   schema: string;
@@ -42,4 +42,6 @@ export const migrations: Migration[] = [
   },
   // Who pays for a ticket, and its interventions (spec 005).
   { name: '0004_billing', sql: (context) => billingMigrationSql(context) },
+  // The organizations whose tickets the worker says to Kete Enterprise (spec 006).
+  { name: '0005_ticket_organizations', sql: (context) => ticketOrganizationsMigrationSql(context) },
 ];
