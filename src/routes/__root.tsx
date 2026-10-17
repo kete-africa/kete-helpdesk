@@ -1,4 +1,3 @@
-import { themeFromCookies } from '@kete/design';
 import { createRootRoute, HeadContent, Outlet, Scripts } from '@tanstack/react-router';
 import { createServerFn } from '@tanstack/react-start';
 import { getRequest } from '@tanstack/react-start/server';
@@ -6,12 +5,19 @@ import type { ReactNode } from 'react';
 import * as m from '@/paraglide/messages.js';
 import { getLocale } from '@/paraglide/runtime.js';
 import { DESIGN } from '@/platform/app';
+import { settingsOf } from '@/platform/settings';
 import appCss from '@/styles/app.css?url';
 
-/** The mode the person chose (spec 041 of kete-core), read before the page is drawn: no flash. */
-const readTheme = createServerFn({ method: 'GET' }).handler(() =>
-  themeFromCookies(getRequest().headers.get('cookie')),
-);
+/**
+ * The mode she chose (kete-core specs 041 and 115), read before the page is drawn: no flash. Her
+ * preferences come from the Compte Kete and follow her in every app; reading them also keeps her
+ * organization's settings for its commands — the currency of what is billed (spec 007).
+ */
+const readTheme = createServerFn({ method: 'GET' }).handler(async () => {
+  const settings = await settingsOf(getRequest()).catch(() => null);
+  if (!settings || settings.from('kete.theme') === 'kete') return null;
+  return settings.value<'dark' | 'light' | 'auto'>('kete.theme');
+});
 
 export const Route = createRootRoute({
   loader: () => readTheme(),

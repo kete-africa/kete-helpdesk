@@ -1,5 +1,6 @@
 import type { KeteIdentity } from '@kete/auth';
 import { performGesture, type Caller } from '@kete/capabilities';
+import { clearSetting, setSetting } from '@kete/settings';
 import { createTestSchema, type TestSchema } from '@kete/testing';
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 import { migrations } from '../db/migrations';
@@ -10,6 +11,7 @@ import { transaction, usePool } from '../src/platform/db';
 import { registry } from '../src/platform/registry';
 import { asPerson } from '../src/platform/rights';
 import { screenActor } from '../src/platform/session';
+import { settingsRegistry } from '../src/platform/settings';
 
 // Spec 005 — who pays for a ticket. The proof of step J1: « A billable intervention prepares an
 // invoice in Kete Finance » — as a draft, for the person, which is verified and issued there.
@@ -226,5 +228,33 @@ describe('a billable intervention prepares an invoice in Kete Finance', () => {
       await gesture(ama, 'tickets_prepare_invoice', { ticketId: ids.warranty, taxRate: 0 }),
     ).toMatchObject({ ok: false, code: 'finance_not_connected' });
     process.env.FINANCE_URL = 'https://finance.test';
+  });
+});
+
+describe('the currency of what is billed (spec 007)', () => {
+  it('is Kete’s setting for the organization, never an environment variable', async () => {
+    await transaction(ORG, (tx) =>
+      setSetting(tx, ORG, settingsRegistry, {
+        layer: 'app',
+        key: 'kete.currency',
+        value: 'GHS',
+        by: 'usr_ama',
+      }),
+    );
+    done(
+      await gesture(ama, 'interventions_record', {
+        ticketId: ids.ticket,
+        doneOn: '2026-10-14',
+        label: 'Contrôle à Accra',
+        minutes: 30,
+        hourlyRate: 100,
+        parts: 0,
+      }),
+    );
+    const recorded = await transaction(ORG, (tx) => interventionsOf(tx, ids.ticket));
+    expect(recorded.find((one) => one.label === 'Contrôle à Accra')?.currency).toBe('GHS');
+    await transaction(ORG, (tx) =>
+      clearSetting(tx, ORG, { layer: 'app', key: 'kete.currency', by: 'usr_ama' }),
+    );
   });
 });
