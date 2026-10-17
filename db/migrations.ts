@@ -2,6 +2,7 @@ import { commandsDelegationMigrationSql, commandsMigrationSql } from '@kete/comm
 import { draftsMigrationSql } from '@kete/drafts';
 import { feedbackMigrationSql } from '@kete/feedback';
 import { outboxMigrationSql } from '@kete/sdk';
+import { settingsMigrationSql } from '@kete/settings';
 import { billingMigrationSql } from '@/features/billing';
 import { ticketOrganizationsMigrationSql, ticketsMigrationSql } from '@/features/tickets';
 
@@ -44,4 +45,6 @@ export const migrations: Migration[] = [
   { name: '0004_billing', sql: (context) => billingMigrationSql(context) },
   // The organizations whose tickets the worker says to Kete Enterprise (spec 006).
   { name: '0005_ticket_organizations', sql: (context) => ticketOrganizationsMigrationSql(context) },
+  // The app's settings and their journal: the currency of what is billed (spec 007).
+  { name: '0006_kete_settings', sql: (context) => settingsMigrationSql(context) },
 ];

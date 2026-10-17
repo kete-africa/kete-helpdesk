@@ -7,7 +7,7 @@ import { transaction } from '@/platform/db';
 import { registry } from '@/platform/registry';
 import { asPerson, holds } from '@/platform/rights';
 import { personOf, screenActor, tokenOf } from '@/platform/session';
-import { billingInput, CURRENCY, interventionInput, invoiceAsk } from './billing';
+import { billingInput, currencyIn, interventionInput, invoiceAsk } from './billing';
 import { financeUrl } from './finance';
 import { billingOf, interventionsOf } from './infrastructure/billing.table';
 
@@ -43,7 +43,7 @@ export const fetchBilling = createServerFn({ method: 'GET' })
       if (!holds('tickets:read')) return null;
       const center = getCenter();
       return transaction(caller.organizationId, async (db) => ({
-        currency: CURRENCY,
+        currency: await currencyIn(db, caller.organizationId),
         bill: holds('tickets:bill'),
         finance: financeUrl() !== null,
         billing: await billingOf(db, data.ticketId),

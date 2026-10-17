@@ -5,7 +5,7 @@ export {
   billingEvents,
   billingPermissions,
   billingInput,
-  CURRENCY,
+  currencyIn,
   interventionInput,
   invoiceAsk,
 } from './billing';

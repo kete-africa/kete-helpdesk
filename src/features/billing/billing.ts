@@ -1,3 +1,5 @@
+import type { SqlExecutor } from '@kete/tenancy';
+import { settingsIn } from '@/platform/settings';
 import { defineCapability, definePermissions } from '@kete/capabilities';
 import { defineCommand } from '@kete/commands';
 import { formatMoney, money } from '@kete/money';
@@ -20,8 +22,14 @@ import {
   setBilling,
 } from './infrastructure/billing.table';
 
-/** The currency of interventions (ISO 4217); F CFA by default. */
-export const CURRENCY = (process.env.SUPPORT_CURRENCY ?? 'XOF').toUpperCase();
+/**
+ * The currency of what is billed (ISO 4217; kete-core specs 115 and 117): `kete.currency` as
+ * Support sets it for the organization, else as the organization set it in the Compte Kete, else
+ * F CFA. An intervention keeps the currency it was recorded in.
+ */
+export async function currencyIn(db: SqlExecutor, organizationId: string): Promise<string> {
+  return (await settingsIn(db, organizationId)).value<string>('kete.currency');
+}
 
 const ticketId = z.string().regex(/^tkt_[0-9a-f-]{8,64}$/);
 const amount = z.number().int().min(0).max(1_000_000_000_000);
@@ -95,7 +103,8 @@ export const recordIntervention = defineCommand({
   reversibility: { reversible: false },
   async handler(input, { db, organizationId, actor }) {
     if (!(await findTicket(db, input.ticketId))) throw new BillingRuleError('ticket_not_found');
-    const amountDue = costOf(input, CURRENCY);
+    const currency = await currencyIn(db, organizationId);
+    const amountDue = costOf(input, currency);
     const interventionId = await insertIntervention(db, {
       organizationId,
       ticketId: input.ticketId,
@@ -105,7 +114,7 @@ export const recordIntervention = defineCommand({
       hourlyRate: input.hourlyRate,
       parts: input.parts,
       amount: amountDue,
-      currency: CURRENCY,
+      currency,
       recordedBy: actingFor(actor),
     });
     return { interventionId, amount: amountDue };
@@ -129,6 +138,7 @@ export const prepareTicketInvoice = defineCommand({
     if (billing?.kind !== 'billable') throw new BillingRuleError('not_billable');
     const open = (await interventionsOf(db, input.ticketId)).filter((one) => !one.invoiceDraftId);
     if (open.length === 0) throw new BillingRuleError('nothing_to_invoice');
+    const currency = await currencyIn(db, organizationId);
     // Invoicing a client commits the organization: its policies decide, at the center (kete-core
     // spec 114) — the same for a person and her agent. Unruled, this app's rules are enough.
     const verdict = await passGesture(currentToken(), actor, {
@@ -138,7 +148,7 @@ export const prepareTicketInvoice = defineCommand({
         : billing.projectId
           ? { kind: 'project', id: billing.projectId }
           : { kind: 'subject', id: `${PRODUCT}.invoice` },
-      amount: { value: open.reduce((sum, one) => sum + one.amount, 0), currency: CURRENCY },
+      amount: { value: open.reduce((sum, one) => sum + one.amount, 0), currency },
     });
     if (verdict.effect === 'refuse') {
       throw new BillingRuleError('refused_by_policy', { reason: sentencesOf(verdict) });
@@ -177,13 +187,13 @@ export const prepareTicketInvoice = defineCommand({
     await announce(db, {
       type: 'ticket.invoice_prepared',
       organization: organizationId,
-      data: { ticketId: input.ticketId, draftId: prepared.draftId, amount: total, currency: CURRENCY },
+      data: { ticketId: input.ticketId, draftId: prepared.draftId, amount: total, currency },
     });
     return {
       draftId: prepared.draftId,
       reviewUrl: prepared.reviewUrl,
       amount: total,
-      shown: formatMoney(money(total, CURRENCY)),
+      shown: formatMoney(money(total, currency)),
     };
   },
   summarize: ({ ticketId }) => `Invoice prepared in Kete Finance for ${ticketId}`,
