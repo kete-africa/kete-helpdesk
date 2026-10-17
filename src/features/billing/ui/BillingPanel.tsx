@@ -20,6 +20,12 @@ function sayRefusal(code: string, facts: Record<string, string | number> = {}): 
     finance_not_connected: m.billing_error_not_connected,
     finance_refused: () => m.billing_error_refused({ reason: String(facts['reason'] ?? '') }),
     not_allowed: m.ticket_error_forbidden,
+    refused_by_policy: () => m.errors_refused_by_policy({ reason: String(facts['reason'] ?? '') }),
+    approval_required: () =>
+      m.errors_approval_required({
+        who: String(facts['who'] ?? ''),
+        reason: String(facts['reason'] ?? ''),
+      }),
   };
   return (words[code] ?? m.error_generic)();
 }

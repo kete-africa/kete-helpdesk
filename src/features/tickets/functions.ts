@@ -5,7 +5,8 @@ import { getRequest } from '@tanstack/react-start/server';
 import { randomUUID } from 'node:crypto';
 import { z } from 'zod';
 import { transaction } from '@/platform/db';
-import { closeTask, enterpriseUrl, sendReading, sendTask } from '@/platform/enterprise';
+import { enterpriseUrl, sendReading } from '@/platform/enterprise';
+import { sayHoldings } from '@/platform/holdings';
 import { env } from '@/platform/env';
 import * as m from '@/paraglide/messages.js';
 import { registry } from '@/platform/registry';
@@ -195,7 +196,8 @@ export const moveTicket = createServerFn({ method: 'POST' })
             },
           }),
         );
-        await followInEnterprise(caller.organizationId, data.ticketId, data.step);
+        // Kete Enterprise hears at once who holds the ticket now (kete-core spec 114).
+        void sayHoldings(caller.organizationId);
         return { ok: true, error: null };
       } catch (error) {
         if (error instanceof TicketRuleError) return { ok: false, error: error.code };
@@ -318,27 +320,3 @@ export const decideReview = createServerFn({ method: 'POST' })
     return { status: decided.status };
   });
 
-/**
- * A ticket taken is a task in its holder's To do in Kete Enterprise, with its deadline; restored,
- * withdrawn or closed, the task leaves it (Enterprise spec 018).
- */
-async function followInEnterprise(organizationId: string, ticketId: string, step: string) {
-  const request = getRequest();
-  if (step === 'acknowledge' || step === 'resume' || step === 'reopen') {
-    const ticket = await transaction(organizationId, (db) => findTicket(db, ticketId));
-    if (!ticket?.acknowledgedAt) return;
-    const due = new Date(
-      ticket.acknowledgedAt.getTime() +
-        targetHours[ticket.criticality] * 3_600_000 +
-        ticket.suspendedMinutes * 60_000,
-    );
-    await sendTask(request, {
-      key: ticket.ticketId,
-      title: m.task_restore({ title: ticket.title }),
-      href: `${env.publicUrl}/tickets/${ticket.ticketId}`,
-      dueAt: due.toISOString(),
-    });
-  } else if (step === 'restore' || step === 'withdraw' || step === 'close' || step === 'suspend') {
-    await closeTask(request, ticketId);
-  }
-}

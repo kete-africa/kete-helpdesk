@@ -4,4 +4,5 @@ export { ticketDatasets } from './datasets';
 export { ticketEvents } from './events';
 export { ticketPermissions } from './policies';
 export { findTicket, ticketsMigrationSql } from './infrastructure/ticket.table';
+export { ticketHoldings, ticketOrganizations, ticketOrganizationsMigrationSql } from './holdings';
 export type { Queue, Ticket } from './ticket.record';

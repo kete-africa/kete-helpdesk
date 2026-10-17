@@ -168,5 +168,8 @@
   "billing_error_client_required": "Un ticket facturable nomme son client.",
   "billing_error_nothing": "Toutes les interventions sont déjà facturées.",
   "billing_error_not_connected": "Kete Finance n’est pas relié : la facture ne peut pas être préparée.",
-  "billing_error_refused": "Kete Finance a refusé : {reason}"
+  "billing_error_refused": "Kete Finance a refusé : {reason}",
+  "holding_ticket_restored": "Faire confirmer le rétablissement : {title}",
+  "errors_refused_by_policy": "Les politiques de l’organisation refusent ce geste : {reason}",
+  "errors_approval_required": "Ce geste demande un accord ({who}) : {reason}"
 }
