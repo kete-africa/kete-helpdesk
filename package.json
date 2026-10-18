@@ -11,7 +11,8 @@
     "db:migrate": "tsx scripts/migrate.ts",
     "design:generate": "tsx scripts/design-generate.ts",
     "test": "vitest run",
-    "typecheck": "vite build && tsc --noEmit"
+    "typecheck": "vite build && tsc --noEmit",
+    "demo": "tsx scripts/demo.ts"
   },
   "dependencies": {
     "@kete/admin": "npm:@kete-africa/admin@^0.3.0",

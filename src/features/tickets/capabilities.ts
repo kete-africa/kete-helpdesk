@@ -4,7 +4,7 @@ import { z } from 'zod';
 import * as m from '@/paraglide/messages.js';
 import { openTicket } from './commands';
 import { findTicket, searchTickets } from './infrastructure/ticket.table';
-import { ticketInput, type Ticket } from './ticket.record';
+import type { Ticket } from './ticket.record';
 
 /** What agents may do with tickets — through MCP, the chat or another app — and how far alone. */
 export const ticketCapabilities = [
@@ -33,7 +33,8 @@ export const ticketCapabilities = [
       'Opens a ticket in a queue for the person: a title, a description, and its criticality (critical, major, standard, minor).',
     permission: 'tickets:write',
     autonomy: 2,
-    input: ticketInput,
+    // The requester's name, when the caller knows it: the ticket says who, not an identifier.
+    input: openTicket.input,
     command: openTicket,
   }),
 ];

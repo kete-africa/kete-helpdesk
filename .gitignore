@@ -9,3 +9,4 @@ project.inlang/README.md
 .env
 .env.*
 !.env.example
+.demo-schema
