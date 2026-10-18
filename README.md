@@ -39,7 +39,19 @@ cp .env.example .env   # then fill it: database, Compte Kete registration, sessi
 pnpm db:migrate
 pnpm dev               # http://localhost:3400
 pnpm worker            # in another terminal: e-mails and events
+pnpm demo              # http://localhost:3441 — an after-sales desk at work, in a throwaway schema
 ```
+
+`pnpm demo` needs only the two test addresses of `.env` (`KETE_TEST_OWNER_URL`,
+`KETE_TEST_APP_URL`). It opens as the head of after-sales: two queues, four tickets, one billable
+intervention ready to be invoiced in Kete Finance (`db/demo/seed.ts`); its schema is dropped when it
+stops.
+
+**Joined to the whole platform** (kete-core's `pnpm platform`, `KETE_DEMO_JOINED=on`): the app signs
+people in through the local Compte Kete, its data are seeded in that Compte Kete's « KYA démo »
+organization — seeded as the app alone, then its screens speak to the center and the other apps —
+and the person signed in is its owner. It then answers on `http://127.0.0.1:<port>`, the loopback
+address the Compte Kete accepts for a client's return.
 
 ## Test
 

@@ -154,7 +154,11 @@ export const addTicket = createServerFn({ method: 'POST' })
   .handler(async ({ data }) => {
     const { identity, caller, as } = await signedIn();
     const result = await as(() =>
-      registry.invoke({ ...caller, name: 'tickets_open', input: data }),
+      registry.invoke({
+        ...caller,
+        name: 'tickets_open',
+        input: { ...data, requesterName: identity.name },
+      }),
     );
     return { status: result.status };
   });
