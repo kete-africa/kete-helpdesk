@@ -4,6 +4,7 @@ import { createServerFn } from '@tanstack/react-start';
 import { getRequest } from '@tanstack/react-start/server';
 import { randomUUID } from 'node:crypto';
 import { z } from 'zod';
+import { getCenter } from '@/platform/center';
 import { transaction } from '@/platform/db';
 import { enterpriseUrl, sendReading } from '@/platform/enterprise';
 import { sayHoldings } from '@/platform/holdings';
@@ -79,7 +80,25 @@ async function signedIn() {
     caller: { actor: screenActor(identity), organizationId: identity.organizationId },
     /** Runs `work` with her rights: her grants at Kete Enterprise, or her role's defaults. */
     as: <T,>(work: () => T | Promise<T>) => asPerson(identity, work, token),
+    token,
   };
+}
+
+/**
+ * A ticket's thread at the center (Kete Enterprise spec 098, FR-010): born with the ticket, opened
+ * again it is the same one. Without a center, there is none, and the ticket works alone.
+ */
+async function threadOfTicket(
+  token: string | null | undefined,
+  ticket: { ticketId: string; title: string },
+): Promise<string | null> {
+  const opened = await getCenter().openObjectThread(token, {
+    kind: 'ticket',
+    id: ticket.ticketId,
+    title: ticket.title.slice(0, 200),
+    href: `${env.publicUrl}/tickets/${ticket.ticketId}`,
+  });
+  return opened?.href ?? null;
 }
 
 /** A ticket as the screens show it: dates as text, and its clock. */
@@ -140,19 +159,20 @@ export const fetchBoard = createServerFn({ method: 'GET' })
 export const fetchTicket = createServerFn({ method: 'GET' })
   .validator((input: unknown) => z.object({ ticketId: z.string().min(1).max(80) }).parse(input))
   .handler(async ({ data }) => {
-    const { identity, caller, as } = await signedIn();
-    return as(async () => {
+    const { identity, caller, as, token } = await signedIn();
+    const ticket = await as(async () => {
       if (!holds('tickets:read')) throw new ScreenError('forbidden');
-      const ticket = await transaction(caller.organizationId, (db) => findTicket(db, data.ticketId));
-      return ticket ? toScreenTicket(ticket) : null;
+      const found = await transaction(caller.organizationId, (db) => findTicket(db, data.ticketId));
+      return found ? toScreenTicket(found) : null;
     });
+    return ticket ? { ...ticket, threadHref: await threadOfTicket(token, ticket) } : null;
   });
 
 /** A person opens a ticket: the same capability an agent acting for her would use. */
 export const addTicket = createServerFn({ method: 'POST' })
   .validator((input: unknown) => ticketInput.parse(input))
   .handler(async ({ data }) => {
-    const { identity, caller, as } = await signedIn();
+    const { identity, caller, as, token } = await signedIn();
     const result = await as(() =>
       registry.invoke({
         ...caller,
@@ -160,6 +180,11 @@ export const addTicket = createServerFn({ method: 'POST' })
         input: { ...data, requesterName: identity.name },
       }),
     );
+    // Its thread is born with it at the center.
+    const opened = (result as { output?: { ticketId?: string } }).output;
+    if (result.status === 'done' && opened?.ticketId) {
+      await threadOfTicket(token, { ticketId: opened.ticketId, title: data.title });
+    }
     return { status: result.status };
   });
 

@@ -171,5 +171,6 @@
   "billing_error_refused": "Kete Finance a refusé : {reason}",
   "holding_ticket_restored": "Faire confirmer le rétablissement : {title}",
   "errors_refused_by_policy": "Les politiques de l’organisation refusent ce geste : {reason}",
-  "errors_approval_required": "Ce geste demande un accord ({who}) : {reason}"
+  "errors_approval_required": "Ce geste demande un accord ({who}) : {reason}",
+  "ticket_thread": "Fil du ticket"
 }
