@@ -89,6 +89,18 @@ function TicketPage() {
                   <Tag tone="info">{statusLabel(ticket.status)}</Tag>
                 </>
               }
+              {...(ticket.threadHref
+                ? {
+                    actions: (
+                      <a
+                        href={ticket.threadHref}
+                        className="inline-flex h-(--control-height) items-center rounded-control border border-line-control px-3 text-body-sm font-semibold"
+                      >
+                        {m.ticket_thread()}
+                      </a>
+                    ),
+                  }
+                : {})}
             />
             <Panel>
               <dl className="grid gap-2 text-body-sm sm:grid-cols-2">

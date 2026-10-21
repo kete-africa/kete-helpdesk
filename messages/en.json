@@ -171,5 +171,6 @@
   "billing_error_refused": "Kete Finance refused: {reason}",
   "holding_ticket_restored": "Have the restoration confirmed: {title}",
   "errors_refused_by_policy": "The organization’s policies refuse this gesture: {reason}",
-  "errors_approval_required": "This gesture needs an approval ({who}): {reason}"
+  "errors_approval_required": "This gesture needs an approval ({who}): {reason}",
+  "ticket_thread": "The ticket’s thread"
 }
