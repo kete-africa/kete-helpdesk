@@ -43,7 +43,7 @@
   "devDependencies": {
     "@inlang/paraglide-js": "^2.25.4",
     "@kete/testing": "npm:@kete-africa/testing@^0.1.0",
-    "@modelcontextprotocol/sdk": "1.31.0",
+    "@modelcontextprotocol/sdk": "1.32.1",
     "@tailwindcss/vite": "^4.3.3",
     "@tanstack/virtual-file-routes": "^1.162.0",
     "@types/node": "^22.20.4",

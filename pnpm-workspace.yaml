@@ -10,3 +10,9 @@ allowBuilds:
 # pnpm's minimum release age.
 minimumReleaseAgeExclude:
   - '@kete-africa/*'
+
+# Fixed versions of advisories published in October 2026, until each dependent asks for them:
+# vitest's tinypool (GHSA-85c8-ppgw-ccpr and its sibling), vite 7 (GHSA-587h-7wmj-h5pm).
+overrides:
+  vitest>tinypool: ^2.1.2
+  'vite@>=7.0.0 <7.3.7': ^7.3.7
