@@ -22,14 +22,17 @@ importers:
         specifier: npm:@kete-africa/capabilities@^0.5.0
         version: '@kete-africa/capabilities@0.5.0(drizzle-orm@0.45.3(@types/pg@8.23.1)(kysely@0.28.17)(pg@8.23.1))'
       '@kete/center':
-        specifier: npm:@kete-africa/center@^0.8.0
-        version: '@kete-africa/center@0.8.0'
+        specifier: npm:@kete-africa/center@^0.9.0
+        version: '@kete-africa/center@0.9.0'
       '@kete/commands':
         specifier: npm:@kete-africa/commands@^0.2.0
         version: '@kete-africa/commands@0.2.0(drizzle-orm@0.45.3(@types/pg@8.23.1)(kysely@0.28.17)(pg@8.23.1))'
+      '@kete/conversation':
+        specifier: npm:@kete-africa/conversation@^0.1.0
+        version: '@kete-africa/conversation@0.1.0(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)'
       '@kete/design':
-        specifier: npm:@kete-africa/design@^0.7.0
-        version: '@kete-africa/design@0.7.0(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)'
+        specifier: npm:@kete-africa/design@^0.15.0
+        version: '@kete-africa/design@0.15.0(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)'
       '@kete/drafts':
         specifier: npm:@kete-africa/drafts@^0.1.1
         version: '@kete-africa/drafts@0.1.1(drizzle-orm@0.45.3(@types/pg@8.23.1)(kysely@0.28.17)(pg@8.23.1))'
@@ -545,8 +548,8 @@ packages:
   '@kete-africa/capabilities@0.5.0':
     resolution: {integrity: sha512-6Sqc9m2h7Y8yMkxD43vzLFuCsWCKX+0N9MgzQN2e16mN9V7fjYPEcvUBQOsIaCdCsWHpANFgZM4R5m+aauVOzw==, tarball: https://npm.pkg.github.com/download/@kete-africa/capabilities/0.5.0/322837df52609530113ec933471c62f54de12efa}
 
-  '@kete-africa/center@0.8.0':
-    resolution: {integrity: sha512-+3iucg5EdlCUFQS41QjcH+66lkMwcgGdszq4XgtedYBh0UNLgMo8+GKO2qVF9erGTvT8vs55qTqeQpk1aJ7VlQ==, tarball: https://npm.pkg.github.com/download/@kete-africa/center/0.8.0/77235d96513b2a79f834ff5c8553aa8dc176992b}
+  '@kete-africa/center@0.9.0':
+    resolution: {integrity: sha512-L8YigHLXGCyd472PeloYuv0fs5ggO88hRcHnB42qCVZOtwd04pMLO+uo0Y/y6P1cC+Pa+1xHouvLiQ1hdvFepw==, tarball: https://npm.pkg.github.com/download/@kete-africa/center/0.9.0/6bb9e26788ca2d217922d9882589f9a1019b9c3b}
 
   '@kete-africa/commands@0.2.0':
     resolution: {integrity: sha512-/uLLszL5C8CXzXZk6v7+jyWMCB0yG+eJDZ9JdDKHtTyc8esvUt1CyOMUbA4AbJz9+9ZZIVskrbIjpabypv2P/w==, tarball: https://npm.pkg.github.com/download/@kete-africa/commands/0.2.0/f0c9b37636e81c356275698065a86ee90114e76a}
@@ -554,18 +557,23 @@ packages:
   '@kete-africa/commands@0.3.1':
     resolution: {integrity: sha512-NeWJo84uPqpdE30XhlQyAMl0OAo+gGAb+fDvVSMUko2ea74NlhmI4eRWXIEUJ60KBx2i25Br9lufiAbuBmFzyA==, tarball: https://npm.pkg.github.com/download/@kete-africa/commands/0.3.1/3bb0e84c22c9f2b52b97ca8200bb193d78061947}
 
+  '@kete-africa/conversation@0.1.0':
+    resolution: {integrity: sha512-dT26U5cArHvC/fS4xbnQDvaG1EKberIWCAhQpBWawshXnP8gDMaa8JXbGDuvcnkdWkYOcWb0GqT1G2xya5pHGw==, tarball: https://npm.pkg.github.com/download/@kete-africa/conversation/0.1.0/186ff17e0321655613a9b8af138513e6b3a7d471}
+    peerDependencies:
+      react: ^19.3.0
+
   '@kete-africa/design@0.14.1':
     resolution: {integrity: sha512-hU36+VFGo3oGCrOIK2S2CHIqWsoSjCc5s/cVqun8yqnNAotzp2nSzz78530LTLB8j3k/H/xm0iMEMOYwNGI06A==, tarball: https://npm.pkg.github.com/download/@kete-africa/design/0.14.1/1f99ab762fd0ae81c4b20a2d359f75e569acadc8}
     peerDependencies:
       react: ^19
 
-  '@kete-africa/design@0.2.0':
-    resolution: {integrity: sha512-alVcN63Kp1JamNCKIXCQgSaKGXyISs6OiL7FmRR2Gatk35wOKx+RiXdVmlGvqS7q/LKgY8GNxvoCh4WXu6zFnw==, tarball: https://npm.pkg.github.com/download/@kete-africa/design/0.2.0/487edb2f2d9dd45c37a4eaf0bc1bd5be83360e50}
+  '@kete-africa/design@0.15.0':
+    resolution: {integrity: sha512-dPngLtI5kc5XyBRApl66doCB8atJWL7nHE2UA+zrSSDN6gybIX70nrvB8mJ4C6WYPwOiD7mkAGPsMy584kiyiw==, tarball: https://npm.pkg.github.com/download/@kete-africa/design/0.15.0/a04d335774761e708720deeda4a6fec274c778e7}
     peerDependencies:
       react: ^19
 
-  '@kete-africa/design@0.7.0':
-    resolution: {integrity: sha512-LGWx36jnNgoqJNSy/DM2+FcJGIGqQAh1ipZbFWsyvfCe7ZyR4e3wmbEuEskQ2/8Bp45tRZny8NJ/Xw4Y6A7ftg==, tarball: https://npm.pkg.github.com/download/@kete-africa/design/0.7.0/fe3d59cc0264d86caed031189626c0a1e5290ee3}
+  '@kete-africa/design@0.2.0':
+    resolution: {integrity: sha512-alVcN63Kp1JamNCKIXCQgSaKGXyISs6OiL7FmRR2Gatk35wOKx+RiXdVmlGvqS7q/LKgY8GNxvoCh4WXu6zFnw==, tarball: https://npm.pkg.github.com/download/@kete-africa/design/0.2.0/487edb2f2d9dd45c37a4eaf0bc1bd5be83360e50}
     peerDependencies:
       react: ^19
 
@@ -599,6 +607,9 @@ packages:
 
   '@kete-africa/sdk@0.15.1':
     resolution: {integrity: sha512-KnRhvVU3+v9W1k+k/MQDRdwSinw91tkDEK83Rx+AmSKtexVEVyMIYJ6jfiCPgcuN7/giBLozBO3yrOaidMlYJA==, tarball: https://npm.pkg.github.com/download/@kete-africa/sdk/0.15.1/4a84b85bd47d196745326da55de0ef7b5562fcd1}
+
+  '@kete-africa/sdk@0.17.0':
+    resolution: {integrity: sha512-fN/3+xcZtmkHQxYl3TxJZZhn+KbruIXjtz4UsEn0Wluq0Hj2eHFxOJgqn6WURq86+4jvlnOABWZaHYK8nmm9WQ==, tarball: https://npm.pkg.github.com/download/@kete-africa/sdk/0.17.0/8f5f3d56a7775956a24f7ba233cbf69ad53fd8e8}
 
   '@kete-africa/sdk@0.3.0':
     resolution: {integrity: sha512-oA7uqcSAT7Ojg4/2jYPvn/tgCqdsQBQUHhxneKWz7sUDIKrTPsJwDvr/6idj4q80eTQuL9HKePW9WVHM/kU61Q==, tarball: https://npm.pkg.github.com/download/@kete-africa/sdk/0.3.0/edf5c753df3adce29d26d4bbc986bae69a95a321}
@@ -3971,7 +3982,7 @@ snapshots:
       - drizzle-orm
       - pg-native
 
-  '@kete-africa/center@0.8.0': {}
+  '@kete-africa/center@0.9.0': {}
 
   '@kete-africa/commands@0.2.0(drizzle-orm@0.45.3(@types/pg@8.23.1)(kysely@0.28.17)(pg@8.23.1))':
     dependencies:
@@ -3991,7 +4002,34 @@ snapshots:
       - drizzle-orm
       - pg-native
 
+  '@kete-africa/conversation@0.1.0(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)':
+    dependencies:
+      '@kete/design': '@kete-africa/design@0.15.0(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)'
+      '@kete/sdk': '@kete-africa/sdk@0.17.0'
+      react: 19.3.0
+    transitivePeerDependencies:
+      - '@types/react'
+      - '@types/react-dom'
+      - pg-native
+      - react-dom
+      - supports-color
+
   '@kete-africa/design@0.14.1(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)':
+    dependencies:
+      '@fontsource-variable/archivo': 5.3.0
+      '@fontsource-variable/instrument-sans': 5.3.0
+      '@fontsource-variable/inter': 5.3.0
+      '@fontsource-variable/jetbrains-mono': 5.3.0
+      '@google/design.md': 0.4.0
+      cmdk: 1.1.1(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
+      react: 19.3.0
+    transitivePeerDependencies:
+      - '@types/react'
+      - '@types/react-dom'
+      - react-dom
+      - supports-color
+
+  '@kete-africa/design@0.15.0(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)':
     dependencies:
       '@fontsource-variable/archivo': 5.3.0
       '@fontsource-variable/instrument-sans': 5.3.0
@@ -4015,21 +4053,6 @@ snapshots:
       '@google/design.md': 0.4.0
       react: 19.3.0
     transitivePeerDependencies:
-      - supports-color
-
-  '@kete-africa/design@0.7.0(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)':
-    dependencies:
-      '@fontsource-variable/archivo': 5.3.0
-      '@fontsource-variable/instrument-sans': 5.3.0
-      '@fontsource-variable/inter': 5.3.0
-      '@fontsource-variable/jetbrains-mono': 5.3.0
-      '@google/design.md': 0.4.0
-      cmdk: 1.1.1(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
-      react: 19.3.0
-    transitivePeerDependencies:
-      - '@types/react'
-      - '@types/react-dom'
-      - react-dom
       - supports-color
 
   '@kete-africa/drafts@0.1.1(drizzle-orm@0.45.3(@types/pg@8.23.1)(kysely@0.28.17)(pg@8.23.1))':
@@ -4088,6 +4111,14 @@ snapshots:
       - pg-native
 
   '@kete-africa/sdk@0.15.1':
+    dependencies:
+      ajv: 8.20.0
+      ajv-formats: 3.0.1(ajv@8.20.0)
+      pg: 8.23.1
+    transitivePeerDependencies:
+      - pg-native
+
+  '@kete-africa/sdk@0.17.0':
     dependencies:
       ajv: 8.20.0
       ajv-formats: 3.0.1(ajv@8.20.0)

@@ -5,4 +5,5 @@
 @source not '../../dist';
 @source '../../node_modules/@kete/design/src';
 @source '../../node_modules/@kete/feedback/src';
+@source '../../node_modules/@kete/conversation/dist';
 /* An app with its own design (D-038) imports its generated CSS here: @import './design.gen.css'; */
