@@ -4,6 +4,7 @@ import { createServerFn } from '@tanstack/react-start';
 import { getRequest } from '@tanstack/react-start/server';
 import { randomUUID } from 'node:crypto';
 import { z } from 'zod';
+import type { CenterThreadMessage } from '@kete/center';
 import { getCenter } from '@/platform/center';
 import { transaction } from '@/platform/db';
 import { enterpriseUrl, sendReading } from '@/platform/enterprise';
@@ -91,15 +92,58 @@ async function signedIn() {
 async function threadOfTicket(
   token: string | null | undefined,
   ticket: { ticketId: string; title: string },
-): Promise<string | null> {
-  const opened = await getCenter().openObjectThread(token, {
+): Promise<{ threadId: string; href: string } | null> {
+  return getCenter().openObjectThread(token, {
     kind: 'ticket',
     id: ticket.ticketId,
     title: ticket.title.slice(0, 200),
     href: `${env.publicUrl}/tickets/${ticket.ticketId}`,
   });
-  return opened?.href ?? null;
 }
+
+/** A message of the center as the screens receive it: its known fields, nothing else. */
+type ThreadMessage = {
+  [K in keyof CenterThreadMessage as string extends K ? never : K]: CenterThreadMessage[K];
+};
+
+/** A ticket she may read, and its thread at the center: none without a center. */
+async function ticketThread(ticketId: string) {
+  const { caller, as, token } = await signedIn();
+  const ticket = await as(async () => {
+    if (!holds('tickets:read')) throw new ScreenError('forbidden');
+    return transaction(caller.organizationId, (db) => findTicket(db, ticketId));
+  });
+  if (!ticket) return { token, thread: null };
+  return { token, thread: await threadOfTicket(token, ticket) };
+}
+
+/**
+ * A ticket's thread, beside the ticket (kete-core spec 141): its last messages at the center, read
+ * with her token — those she may read, as « Fils » shows them. Without a center, none.
+ */
+export const fetchTicketThread = createServerFn({ method: 'GET' })
+  .validator((input: unknown) => z.object({ ticketId: z.string().min(1).max(80) }).parse(input))
+  .handler(async ({ data }) => {
+    const { token, thread } = await ticketThread(data.ticketId);
+    if (!thread) return null;
+    const read = await getCenter().thread(token, thread.threadId);
+    return read
+      ? { ...read, messages: read.messages as ThreadMessage[], href: thread.href }
+      : null;
+  });
+
+/** She says something in the ticket's thread, as herself: every member reads it in « Fils ». */
+export const sayInTicketThread = createServerFn({ method: 'POST' })
+  .validator((input: unknown) =>
+    z
+      .object({ ticketId: z.string().min(1).max(80), text: z.string().trim().min(1).max(20000) })
+      .parse(input),
+  )
+  .handler(async ({ data }) => {
+    const { token, thread } = await ticketThread(data.ticketId);
+    if (!thread) return { ok: false, error: 'not_connected' };
+    return getCenter().sayInThread(token, thread.threadId, { text: data.text });
+  });
 
 /** A ticket as the screens show it: dates as text, and its clock. */
 export interface TicketScreen extends Omit<
@@ -137,7 +181,9 @@ const toScreenTicket = (t: Ticket): TicketScreen => ({
 
 export const fetchPerson = createServerFn({ method: 'GET' }).handler(async () => {
   const identity = await personOf(getRequest());
-  return identity ? { name: identity.name, organizationId: identity.organizationId } : null;
+  return identity
+    ? { name: identity.name, organizationId: identity.organizationId, userId: identity.userId }
+    : null;
 });
 
 export const fetchBoard = createServerFn({ method: 'GET' })
@@ -165,7 +211,9 @@ export const fetchTicket = createServerFn({ method: 'GET' })
       const found = await transaction(caller.organizationId, (db) => findTicket(db, data.ticketId));
       return found ? toScreenTicket(found) : null;
     });
-    return ticket ? { ...ticket, threadHref: await threadOfTicket(token, ticket) } : null;
+    return ticket
+      ? { ...ticket, threadHref: (await threadOfTicket(token, ticket))?.href ?? null }
+      : null;
   });
 
 /** A person opens a ticket: the same capability an agent acting for her would use. */

@@ -55,6 +55,22 @@ address the Compte Kete accepts for a client's return.
 
 
 **Its thread at the center** (Kete Enterprise spec 098): a ticket's thread is born at the center when it is opened (`@kete/center`'s `openObjectThread`, with the person's token) and opened again from « Fil du ticket »; without a center, there is none and Support works alone.
+
+**Its thread, beside the ticket** (spec 008; kete-core spec 141): the ticket's page shows that
+thread — the same conversation as « Fils » at the center, drawn by `@kete/conversation` — and she
+answers in it with the one composer (`@kete/center`'s `thread` and `sayInThread`, with her token).
+
+```mermaid
+sequenceDiagram
+  participant P as The ticket's page
+  participant S as Support (server)
+  participant C as Kete Enterprise
+  P->>S: fetchTicketThread(ticket)
+  S->>C: openObjectThread → threadId · thread(her token)
+  C-->>P: messages · names
+  P->>S: sayInTicketThread(« Pièce commandée »)
+  S->>C: sayInThread(her token)
+```
 ## Test
 
 ```bash

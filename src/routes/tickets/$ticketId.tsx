@@ -9,6 +9,7 @@ import { requirePerson } from '@/lib/signed-in';
 import * as m from '@/paraglide/messages.js';
 import { getLocale } from '@/paraglide/runtime.js';
 import { criticalityLabel, statusLabel } from '@/features/tickets/ui/labels';
+import { TicketThread } from '@/features/tickets/ui/TicketThread';
 
 export const Route = createFileRoute('/tickets/$ticketId')({
   beforeLoad: ({ location }) => requirePerson(location.href),
@@ -138,6 +139,7 @@ function TicketPage() {
               {error && <p role="alert" className="mt-2 text-body-sm text-state-error-fg">{error}</p>}
             </Panel>
             {billing && <BillingPanel ticketId={ticket.ticketId} loaded={billing} />}
+            <TicketThread ticketId={ticket.ticketId} />
           </>
         )}
       </div>
