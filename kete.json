@@ -16,5 +16,72 @@
       "used": false
     },
     "criticality": "medium"
-  }
+  },
+  "objects": [
+    {
+      "kind": "ticket",
+      "label": {
+        "fr": "Ticket",
+        "en": "Ticket",
+        "fr_plural": "Tickets",
+        "en_plural": "Tickets"
+      },
+      "icon": "help",
+      "states": [
+        {
+          "id": "received",
+          "label": {
+            "fr": "Reçu",
+            "en": "Received"
+          },
+          "tone": "info"
+        },
+        {
+          "id": "acknowledged",
+          "label": {
+            "fr": "Pris en charge",
+            "en": "Acknowledged"
+          },
+          "tone": "verify"
+        },
+        {
+          "id": "suspended",
+          "label": {
+            "fr": "Suspendu",
+            "en": "Suspended"
+          },
+          "tone": "neutral"
+        },
+        {
+          "id": "restored",
+          "label": {
+            "fr": "Rétabli",
+            "en": "Restored"
+          },
+          "tone": "ok"
+        },
+        {
+          "id": "closed",
+          "label": {
+            "fr": "Clos",
+            "en": "Closed"
+          },
+          "tone": "neutral",
+          "closed": true
+        },
+        {
+          "id": "withdrawn",
+          "label": {
+            "fr": "Retiré",
+            "en": "Withdrawn"
+          },
+          "tone": "neutral",
+          "closed": true
+        }
+      ],
+      "axes": [
+        "person"
+      ]
+    }
+  ]
 }

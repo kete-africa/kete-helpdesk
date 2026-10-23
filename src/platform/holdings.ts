@@ -1,10 +1,10 @@
-import { ticketHoldings, ticketOrganizations } from '@/features/tickets';
+import { ticketHoldings, ticketObjects, ticketOrganizations } from '@/features/tickets';
 import { getCenter } from './center';
 import { getPool, transaction } from './db';
 import { centerAppToken } from './events';
 
 // What Support holds, said to Kete Enterprise (kete-core spec 114; doctrine D-056): every ticket in
-// someone's hands, with who holds it. The center keeps them in « Pour moi », relays them when
+// someone's hands, with who holds it — and every ticket to the center's index (spec 009). The center keeps them in « Pour moi », relays them when
 // their holder is away and finishes those no longer said. Said all at once: after a step of a
 // ticket, and every minute by the worker.
 
@@ -20,6 +20,10 @@ export async function sayHoldings(organizationId: string): Promise<void> {
     const holdings = await transaction(organizationId, (db) => ticketHoldings(db, publicUrl()));
     const said = await center.sayHoldings(token, organizationId, holdings);
     if (!said.ok) console.warn('[holdings] not said to the center', organizationId, said.error);
+    // Its tickets to the center's index (spec 009): found and cited there with each one's rights.
+    const objects = await transaction(organizationId, (db) => ticketObjects(db, publicUrl()));
+    const indexed = await center.sayObjects(token, organizationId, objects);
+    if (!indexed.ok) console.warn('[objects] not said to the center', organizationId, indexed.error);
   } catch (error) {
     console.warn('[holdings] not said to the center', organizationId, (error as Error).message);
   }
