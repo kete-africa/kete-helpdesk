@@ -93,6 +93,13 @@ start-up) and the worker (`pnpm worker`). An operator registers the app at the C
 | owner, admin | yes | yes | yes |
 | member | yes | yes | no |
 
+## Its tickets in the center's index (spec 009)
+
+Support declares its kind « ticket » in `kete.json` (`objects`) and, with its holdings, says its open
+tickets and those ended this week to Kete Enterprise's index (kete-core `sayObjects`): « # », the
+search, Kete and the agents of the center find them with each person's own rights. The ticket's
+data stays here.
+
 ## Who pays (spec 005)
 
 A ticket says who pays — warranty, maintenance contract, or billable to the client. Its

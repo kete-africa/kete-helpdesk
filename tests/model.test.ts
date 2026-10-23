@@ -1,11 +1,13 @@
 import type { KeteIdentity } from '@kete/auth';
-import { holdingBody } from '@kete/center';
+import { holdingBody, objectBody } from '@kete/center';
+import { validateManifest, validateObject } from '@kete/sdk';
 import { performGesture, type Caller } from '@kete/capabilities';
 import { executeCommand } from '@kete/commands';
 import { createTestSchema, type TestSchema } from '@kete/testing';
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 import { migrations } from '../db/migrations';
-import { ticketHoldings, ticketOrganizations } from '../src/features/tickets';
+import { ticketHoldings, ticketObjects, ticketOrganizations } from '../src/features/tickets';
+import { manifest } from '../src/platform/events';
 import { acknowledgeTicket, suspendTicket } from '../src/features/tickets/commands';
 import { insertQueue } from '../src/features/tickets/infrastructure/ticket.table';
 import { transaction, usePool } from '../src/platform/db';
@@ -130,6 +132,23 @@ describe('what Support holds', () => {
     const [suspended] = await transaction(ORG, (tx) => ticketHoldings(tx, null));
     expect(suspended).toMatchObject({ state: 'held' });
     expect(suspended).not.toHaveProperty('href');
+  });
+});
+
+describe('Support’s tickets in the center’s index (spec 009)', () => {
+  it('declares its kind « ticket » and says each ticket in the contract’s shape', async () => {
+    const declared = manifest();
+    expect(validateManifest(declared).ok).toBe(true);
+    expect(declared.objects?.[0]).toMatchObject({ kind: 'ticket', axes: ['person'] });
+    const [ticket] = await transaction(ORG, (tx) => ticketObjects(tx, 'https://support.test'));
+    expect(ticket).toMatchObject({
+      kind: 'ticket',
+      id: ticketId,
+      personId: 'usr_ama',
+      href: `https://support.test/tickets/${ticketId}`,
+    });
+    expect(declared.objects?.[0]?.states.some((s) => s.id === ticket?.state)).toBe(true);
+    expect(validateObject(objectBody(ticket as never)).ok).toBe(true);
   });
 });
 
